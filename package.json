@@ -1,2 +1,13 @@
-server.js
-index.html
+{
+  "name": "the-house-game",
+  "version": "1.0.0",
+  "description": "The House - multiplayer 3D casino resort",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1"
+  }
+}
