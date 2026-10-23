@@ -1,1 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The House</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: system-ui, sans-serif;
+      background: #10151c;
+      color: white;
+    }
+    #hud {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+    #brand {
+      position: absolute;
+      top: 20px;
+      left: 22px;
+      font-size: 25px;
+      font-weight: 900;
+      letter-spacing: 3px;
+    }
+    #status {
+      position: absolute;
+      top: 62px;
+      left: 24px;
+      color: #b8c4d1;
+      font-size: 13px;
+    }
+    #help {
+      position: absolute;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111a24e8;
+      border: 1px solid #ffffff22;
+      border-radius: 12px;
+      padding: 12px 18px;
+      text-align: center;
+      font-size: 13px;
+      width: max-content;
+      max-width: 94%;
+    }
+    #start {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      display: grid;
+      place-items: center;
+      background: #09111bdc;
+    }
+    #panel {
+      width: min(420px, 90vw);
+      padding: 32px;
+      text-align: center;
+      border-radius: 22px;
+      background: #172330;
+      border: 1px solid #ffffff22;
+      box-shadow: 0 20px 70px #0008;
+    }
+    #panel h1 {
+      font-size: 40px;
+      letter-spacing: 4px;
+      margin: 0 0 8px;
+    }
+    #panel p { color: #b8c4d1; line-height: 1.6; }
+    button {
+      pointer-events: auto;
+      cursor: pointer;
+      border: 0;
+      border-radius: 10px;
+      background: #d7ae61;
+      color: #171717;
+      font-weight: 800;
+      padding: 14px 22px;
+      font-size: 15px;
+    }
+    #crosshair {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 0 4px #000;
+    }
+    #players {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      color: #d7e0ea;
+      font-size: 13px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <div id="brand">THE HOUSE</div>
+    <div id="status">CASINO RESORT · PRE-RELEASE</div>
+    <div id="players">Players online: 1</div>
+    <div id="crosshair"></div>
+    <div id="help">
+      <b>W A S D</b> Move &nbsp;·&nbsp;
+      <b>MOUSE</b> Look &nbsp;·&nbsp;
+      <b>ESC</b> Pause
+    </div>
+  </div>
 
+  <div id="start">
+    <div id="panel">
+      <h1>THE HOUSE</h1>
+      <p>Your resort is taking shape. Step inside and explore the first playable prototype.</p>
+      <p>WASD to move · Mouse to look</p>
+      <button id="play">ENTER THE RESORT</button>
+      <p id="message">Best experienced on a computer.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+    import { PointerLockControls } from "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/PointerLockControls.js";
+    import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color("#9bc8d9");
+    scene.fog = new THREE.Fog("#9bc8d9", 35, 105);
+
+    const camera = new THREE.PerspectiveCamera(
+      75, innerWidth / innerHeight, 0.1, 250
+    );
+    camera.position.set(0, 1.7, 13);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    document.body.appendChild(renderer.domElement);
+
+    scene.add(new THREE.HemisphereLight("#eaf5ff", "#59604d", 2.0));
+
+    const sun = new THREE.DirectionalLight("#ffe0a5", 3.0);
+    sun.position.set(-12, 24, 8);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(1024, 1024);
+    scene.add(sun);
+
+    const controls = new PointerLockControls(camera, document.body);
+    const startScreen = document.querySelector("#start");
+    const message = document.querySelector("#message");
+
+    document.querySelector("#play").addEventListener("click", () => {
+      controls.lock();
+    });
+
+    controls.addEventListener("lock", () => {
+      startScreen.style.display = "none";
+      message.textContent = "Best experienced on a computer.";
+    });
+
+    controls.addEventListener("unlock", () => {
+      startScreen.style.display = "grid";
+    });
+
+    const mat = (color, roughness = 0.8, metalness = 0) =>
+      new THREE.MeshStandardMaterial({ color, roughness, metalness });
+
+    const materials = {
+      floor: mat("#c4ad8c"),
+      wall: mat("#e9ddc7"),
+      dark: mat("#243344"),
+      teal: mat("#327c79"),
+      gold: mat("#d7ae61", 0.35, 0.5),
+      red: mat("#a84149"),
+      green: mat("#4d8964"),
+      white: mat("#f4eee2"),
+      glass: new THREE.MeshStandardMaterial({
+        color: "#92c8db", roughness: 0.2, metalness: 0.1,
+        transparent: true, opacity: 0.42
+      })
+    };
+
+    function box(name, x, y, z, sx, sy, sz, material, cast = true) {
+      const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(sx, sy, sz), material
+      );
+      mesh.name = name;
+      mesh.position.set(x, y, z);
+      mesh.castShadow = cast;
+      mesh.receiveShadow = true;
+      scene.add(mesh);
+      return mesh;
+    }
+
+    // Main casino floor
+    box("floor", 0, -0.25, 0, 44, 0.5, 44, materials.floor, false);
+
+    // Walls and architectural columns
+    box("back wall", 0, 4, -21, 44, 8, 1, materials.wall);
+    box("left wall", -21.5, 4, 0, 1, 8, 42, materials.wall);
+    box("right wall", 21.5, 4, 0, 1, 8, 42, materials.wall);
+    box("front left wall", -15, 4, 21, 14, 8, 1, materials.wall);
+    box("front right wall", 15, 4, 21, 14, 8, 1, materials.wall);
+
+    // Ceiling beams and warm architectural details
+    box("ceiling", 0, 8.1, 0, 44, 0.3, 44, materials.dark, false);
+    for (let x = -18; x <= 18; x += 9) {
+      box("column", x, 3.9, -15, 0.75, 7.8, 0.75, materials.dark);
+      box("column trim", x, 7.5, -15, 1.1, 0.25, 1.1, materials.gold);
+    }
+
+    // Decorative wall panels
+    for (let x = -17; x <= 17; x += 5.7) {
+      box("wall panel", x, 3.5, -20.42, 3.6, 5.6, 0.12, materials.teal);
+      box("panel trim", x, 6.45, -20.3, 3.8, 0.16, 0.18, materials.gold);
+    }
+
+    // Welcome desk
+    box("desk base", 0, 0.7, -12, 8, 1.4, 1.8, materials.dark);
+    box("desk top", 0, 1.48, -12, 8.3, 0.18, 2, materials.gold);
+    box("desk front", 0, 0.85, -11.05, 7.4, 0.8, 0.12, materials.teal);
+
+    // Casino tables
+    function casinoTable(x, z, color) {
+      const topMat = mat(color, 0.75);
+      box("table pedestal", x, 0.65, z, 1.1, 1.3, 1.1, materials.dark);
+      box("table rim", x, 1.35, z, 4.2, 0.25, 2.8, materials.gold);
+      box("felt top", x, 1.5, z, 3.95, 0.12, 2.55, topMat);
+
+      for (let i = -1; i <= 1; i++) {
+        box("casino chair", x + i * 2, 0.55, z + 2.4,
+          1.05, 1.1, 0.8, materials.red);
+      }
+    }
+
+    casinoTable(-10, -3, "#26735e");
+    casinoTable(0, 3, "#304d7a");
+    casinoTable(10, -3, "#26735e");
+
+    // Slot machine banks
+    function slotMachine(x, z) {
+      box("slot base", x, 0.6, z, 1.4, 1.2, 1.2, materials.dark);
+      box("slot cabinet", x, 1.9, z, 1.3, 1.6, 1, materials.teal);
+      box("slot screen", x, 2.1, z + 0.53, 0.9, 0.7, 0.08, materials.dark);
+      box("slot trim", x, 2.65, z + 0.55, 1.05, 0.12, 0.1, materials.gold);
+      const lamp = new THREE.PointLight("#f4c86a", 0.7, 3);
+      lamp.position.set(x, 2.8, z);
+      scene.add(lamp);
+    }
+
+    for (let x = -15; x <= 15; x += 3) {
+      slotMachine(x, -17);
+    }
+
+    // Indoor planters
+    function planter(x, z) {
+      box("planter", x, 0.35, z, 1.7, 0.7, 1.7, materials.dark);
+      const trunk = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.12, 0.18, 1.6, 8),
+        mat("#8c6547")
+      );
+      trunk.position.set(x, 1.5, z);
+      scene.add(trunk);
+
+      const leaves = new THREE.Mesh(
+        new THREE.SphereGeometry(1.15, 10, 8),
+        mat("#4d8964")
+      );
+      leaves.position.set(x, 2.7, z);
+      leaves.scale.set(1, 1.25, 1);
+      leaves.castShadow = true;
+      scene.add(leaves);
+    }
+
+    planter(-18, 15);
+    planter(18, 15);
+    planter(-18, -5);
+    planter(18, -5);
+
+    // Exterior resort glimpses through the entrance
+    const outdoor = box("outdoor ground", 0, -0.5, 32, 70, 0.3, 26,
+      mat("#79a875"), false);
+    box("pool", 0, -0.28, 31, 15, 0.08, 8,
+      mat("#56b9d4", 0.25, 0.15), false);
+
+    for (let x = -12; x <= 12; x += 6) {
+      planter(x, 40);
+    }
+
+    // A few simple stylized multiplayer avatars
+    const remotePlayers = new Map();
+    const socket = io();
+
+    const playerCount = document.querySelector("#players");
+
+    function makeAvatar(color) {
+      const group = new THREE.Group();
+      const body = new THREE.Mesh(
+        new THREE.CapsuleGeometry(0.35, 0.7, 4, 8),
+        mat(color)
+      );
+      body.position.y = 1.0;
+      group.add(body);
+
+      const head = new THREE.Mesh(
+        new THREE.SphereGeometry(0.28, 12, 10),
+        mat("#edc7a4")
+      );
+      head.position.y = 1.75;
+      group.add(head);
+
+      const marker = new THREE.Mesh(
+        new THREE.BoxGeometry(0.16, 0.16, 0.6),
+        materials.gold
+      );
+      marker.position.set(0, 1.3, -0.4);
+      group.add(marker);
+
+      scene.add(group);
+      return group;
+    }
+
+    function updatePlayerCount() {
+      playerCount.textContent = `Players online: ${remotePlayers.size + 1}`;
+    }
+
+    socket.on("currentPlayers", (players) => {
+      for (const [id, player] of Object.entries(players)) {
+        if (id === socket.id) continue;
+        const avatar = makeAvatar(player.color);
+        avatar.position.set(player.x, 0, player.z);
+        avatar.rotation.y = player.rotation;
+        remotePlayers.set(id, avatar);
+      }
+      updatePlayerCount();
+    });
+
+    socket.on("playerJoined", ({ id, player }) => {
+      if (id === socket.id || remotePlayers.has(id)) return;
+      const avatar = makeAvatar(player.color);
+      avatar.position.set(player.x, 0, player.z);
+      remotePlayers.set(id, avatar);
+      updatePlayerCount();
+    });
+
+    socket.on("playerMoved", ({ id, player }) => {
+      const avatar = remotePlayers.get(id);
+      if (!avatar) return;
+      avatar.position.set(player.x, 0, player.z);
+      avatar.rotation.y = player.rotation;
+    });
+
+    socket.on("playerLeft", (id) => {
+      const avatar = remotePlayers.get(id);
+      if (avatar) {
+        scene.remove(avatar);
+        remotePlayers.delete(id);
+        updatePlayerCount();
+      }
+    });
+
+    const keys = {};
+    document.addEventListener("keydown", (event) => {
+      keys[event.code] = true;
+    });
+    document.addEventListener("keyup", (event) => {
+      keys[event.code] = false;
+    });
+
+    const clock = new THREE.Clock();
+    let sendTimer = 0;
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const delta = Math.min(clock.getDelta(), 0.05);
+
+      if (controls.isLocked) {
+        const speed = 7 * delta;
+        if (keys.KeyW) controls.moveForward(speed);
+        if (keys.KeyS) controls.moveForward(-speed);
+        if (keys.KeyA) controls.moveRight(-speed);
+        if (keys.KeyD) controls.moveRight(speed);
+
+        camera.position.x = THREE.MathUtils.clamp(camera.position.x, -19, 19);
+        camera.position.z = THREE.MathUtils.clamp(camera.position.z, -19, 19);
+        camera.position.y = 1.7;
+
+        sendTimer += delta;
+        if (sendTimer > 0.06 && socket.connected) {
+          socket.emit("move", {
+            x: camera.position.x,
+            z: camera.position.z,
+            rotation: camera.rotation.y
+          });
+          sendTimer = 0;
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener("resize", () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+
+    socket.on("connect", () => {
+      message.textContent = "Connected to The House server.";
+    });
+
+    socket.on("connect_error", () => {
+      message.textContent = "Server not connected yet. We'll connect it on Render.";
+    });
+  </script>
+</body>
+</html>
