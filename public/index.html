@@ -498,33 +498,7 @@
           materials.red
         );
       }
-    }      // Printed layout sits just above the felt.
-      const layout = new THREE.Mesh(
-        new THREE.PlaneGeometry(3.85, 2.45),
-        new THREE.MeshBasicMaterial({
-          map: createTableLayout(type),
-          side: THREE.DoubleSide
-        })
-      );
-
-      layout.rotation.x = -Math.PI / 2;
-      layout.position.set(x, 1.565, z);
-      scene.add(layout);
-
-      // Chairs around each table
-      for (let i = -1; i <= 1; i++) {
-        box(
-          "casino chair",
-          x + i * 2,
-          0.55,
-          z + 2.4,
-          1.05,
-          1.1,
-          0.8,
-          materials.red
-        );
-      }
-    }
+    }     
 
     casinoTable(-10, -3, "roulette");
     casinoTable(0, 3, "blackjack");
