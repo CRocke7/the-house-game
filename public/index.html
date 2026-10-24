@@ -566,21 +566,24 @@
         scene.add(layout);
       }
 
-      // Chairs around each table
-      for (let i = -1; i <= 1; i++) {
-        box(
-          "casino chair",
-          x + i * 2,
-          0.55,
-          z + 2.4,
-          1.05,
-          1.1,
-          0.8,
-          materials.red
-        );
-      }
-    }     
+     // Chairs around each table
+for (let i = -1; i <= 1; i++) {
+  box(
+    "casino chair",
+    x + i * 2,
+    0.55,
+    z + 2.4,
+    1.05,
+    1.1,
+    0.8,
+    materials.red
+  );
+}
 
+// Add the roulette wheel only to the roulette table
+if (type === "roulette") {
+  createRouletteWheel(x, z);
+}    
     casinoTable(-10, -3, "roulette");
     casinoTable(0, 3, "blackjack");
     casinoTable(10, -3, "craps");
