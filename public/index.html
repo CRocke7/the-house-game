@@ -961,6 +961,12 @@ if (results.every(s => s.name === results[0].name)) {
   slotMessage.textContent = `No match! You lost $${bet.toLocaleString()}.`;
 }
 
+      if (pendingBalance !== null) {
+        balanceDisplay.textContent = `Balance: $${pendingBalance.toLocaleString()}`;
+        recoveryButton.style.display = pendingBalance <= 0 ? "block" : "none";
+        pendingBalance = null;
+      }      
+      
       activeSpin = null;
 
       messageTimer = setTimeout(() => {
