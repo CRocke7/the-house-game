@@ -1125,52 +1125,84 @@ socket.on("slotSpinError", (error) => {
 });    
     const playerCount = document.querySelector("#players");
 
-    function makeAvatar(color) {
-      const group = new THREE.Group();
-      const body = new THREE.Mesh(
-        new THREE.CapsuleGeometry(0.35, 0.7, 4, 8),
-        mat(color)
-      );
-      body.position.y = 1.0;
-      group.add(body);
+   function makeAvatar(color) {
+  const group = new THREE.Group();
 
-      const head = new THREE.Mesh(
-        new THREE.SphereGeometry(0.28, 12, 10),
-        mat("#edc7a4")
-      );
-      head.position.y = 1.75;
-      group.add(head);
+  const shirtMaterial = mat(color);
+  const skinMaterial = mat("#edc7a4");
+  const pantsMaterial = mat("#26344a");
+  const shoeMaterial = mat("#202020");
 
-      const marker = new THREE.Mesh(
-        new THREE.BoxGeometry(0.16, 0.16, 0.6),
-        materials.gold
-      );
-      marker.position.set(0, 1.3, -0.4);
-      group.add(marker);
+  // Torso
+  const torso = new THREE.Mesh(
+    new THREE.BoxGeometry(0.65, 0.75, 0.35),
+    shirtMaterial
+  );
+  torso.position.y = 1.25;
+  group.add(torso);
 
-      scene.add(group);
-      return group;
-    }
+  // Head
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(0.25, 20, 16),
+    skinMaterial
+  );
+  head.position.y = 1.9;
+  group.add(head);
 
-    function updatePlayerCount() {
-      playerCount.textContent = `Players online: ${remotePlayers.size + 1}`;
-    }
+  // Hair
+  const hair = new THREE.Mesh(
+    new THREE.SphereGeometry(0.255, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.48),
+    mat("#38271e")
+  );
+  hair.position.y = 1.98;
+  group.add(hair);
 
-    socket.on("currentPlayers", (players) => {
-  for (const [id, player] of Object.entries(players)) {
-    if (id === socket.id) continue;
+  // Arms
+  for (const side of [-1, 1]) {
+    const arm = new THREE.Mesh(
+      new THREE.CapsuleGeometry(0.105, 0.42, 4, 8),
+      shirtMaterial
+    );
+    arm.position.set(side * 0.43, 1.25, 0);
+    arm.rotation.z = side * -0.12;
+    group.add(arm);
 
-    // Avoid creating the same avatar twice
-    if (remotePlayers.has(id)) continue;
+    // Hands
+    const hand = new THREE.Mesh(
+      new THREE.SphereGeometry(0.09, 12, 10),
+      skinMaterial
+    );
+    hand.position.set(side * 0.45, 0.94, 0);
+    group.add(hand);
 
-    const avatar = makeAvatar(player.color);
-    avatar.position.set(player.x, 0, player.z);
-    avatar.rotation.y = player.rotation;
-    remotePlayers.set(id, avatar);
+    // Legs
+    const leg = new THREE.Mesh(
+      new THREE.BoxGeometry(0.23, 0.48, 0.27),
+      pantsMaterial
+    );
+    leg.position.set(side * 0.17, 0.48, 0);
+    group.add(leg);
+
+    // Shoes
+    const shoe = new THREE.Mesh(
+      new THREE.BoxGeometry(0.24, 0.13, 0.38),
+      shoeMaterial
+    );
+    shoe.position.set(side * 0.17, 0.13, -0.04);
+    group.add(shoe);
   }
 
-  updatePlayerCount();
-});
+  // Gold player identifier on the back
+  const marker = new THREE.Mesh(
+    new THREE.BoxGeometry(0.16, 0.16, 0.12),
+    materials.gold
+  );
+  marker.position.set(0, 1.35, -0.23);
+  group.add(marker);
+
+  scene.add(group);
+  return group;
+}
 
     socket.on("playerMoved", ({ id, player }) => {
       const avatar = remotePlayers.get(id);
