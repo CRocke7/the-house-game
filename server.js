@@ -96,6 +96,8 @@ socket.on("joinRoom", (code) => {
     players[socket.id].z = Math.max(-45, Math.min(45, z));
     players[socket.id].rotation = rotation;
 
+    if (!playerRooms[socket.id]) return;    
+    
     socket.to(playerRooms[socket.id]).emit("playerMoved", {
       id: socket.id,
       player: players[socket.id]
