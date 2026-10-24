@@ -1204,20 +1204,16 @@ socket.on("slotSpinError", (error) => {
   return group;
 }
 
-    socket.on("playerMoved", ({ id, player }) => {
-      const avatar = remotePlayers.get(id);
-      if (!avatar) return;
+socket.on("playerJoined", ({ id, player }) => {
+      if (id === socket.id) return;
+      if (remotePlayers.has(id)) return;
+
+      const avatar = makeAvatar(player.color);
       avatar.position.set(player.x, 0, player.z);
       avatar.rotation.y = player.rotation;
-    });
 
-    socket.on("playerLeft", (id) => {
-      const avatar = remotePlayers.get(id);
-      if (avatar) {
-        scene.remove(avatar);
-        remotePlayers.delete(id);
-        updatePlayerCount();
-      }
+      remotePlayers.set(id, avatar);
+      updatePlayerCount();
     });
 // Jump settings
 let verticalVelocity = 0;
