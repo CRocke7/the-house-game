@@ -110,9 +110,10 @@
     <div id="crosshair"></div>
     <div id="help">
       <b>W A S D</b> Move &nbsp;·&nbsp;
+      <b>SPACE</b> Jump &nbsp;·&nbsp;
       <b>MOUSE</b> Look &nbsp;·&nbsp;
-      <b>ESC</b> Pause
-    </div>
+      <b>ESC</b> Pause    
+   </div>
   </div>
 
   <div id="start">
@@ -804,7 +805,6 @@ const groundY = 2.2; // Your camera's starting height
 let isGrounded = true;    
   
   const keys = {};
-    const keys = {};
 
 document.addEventListener("keydown", (event) => {
   keys[event.code] = true;
@@ -831,6 +831,17 @@ document.addEventListener("keyup", (event) => {
 
       const delta = Math.min(clock.getDelta(), 0.05);
 
+      // Apply gravity and vertical movement
+      verticalVelocity -= gravity * delta;
+      camera.position.y += verticalVelocity * delta;
+
+      // Keep the player at standing height when grounded
+      if (camera.position.y <= groundY) {
+        camera.position.y = groundY;
+        verticalVelocity = 0;
+        isGrounded = true;
+      }
+      
       if (controls.isLocked) {
        const speed = 7 * delta;
        const oldPosition = camera.position.clone();
