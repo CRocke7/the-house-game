@@ -57,6 +57,46 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("slotSpin", (bet) => {
+  const player = players[socket.id];
+
+  if (!player) return;
+
+  if (
+    typeof bet !== "number" ||
+    !Number.isInteger(bet) ||
+    bet < 100 ||
+    bet > player.balance
+  ) {
+    socket.emit("slotSpinError", "Bet must be at least $100 and no more than your balance.");
+    return;
+  }
+
+  player.balance -= bet;
+
+  const names = ["Cherry", "Lemon", "Diamond", "Clover", "Seven"];
+
+  const results = Array.from({ length: 3 }, () =>
+    names[Math.floor(Math.random() * names.length)]
+  );
+
+  let payout = 0;
+
+  if (results.every((name) => name === results[0])) {
+    payout = bet * 5;
+  } else if (
+    results[0] === results[1] ||
+    results[1] === results[2] ||
+    results[0] === results[2]
+  ) {
+    payout = bet * 1.5;
+  }
+
+  player.balance += payout;
+
+  socket.emit("balanceUpdate", player.balance);
+  socket.emit("slotSpinResult", { results, payout, bet });
+});  
   socket.on("disconnect", () => {
     delete players[socket.id];
     io.emit("playerLeft", socket.id);
