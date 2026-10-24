@@ -981,8 +981,25 @@ spinButton.addEventListener("click", () => {
     
     socket.on("balanceUpdate", (balance) => {
       balanceDisplay.textContent = `Balance: $${balance.toLocaleString()}`;
-    });    
-    
+    });
+  
+  socket.on("slotSpinResult", ({ results, payout, bet }) => {
+  spinButton.disabled = false;
+
+  if (!selectedSlotMachine) {
+    slotMessage.style.display = "block";
+    slotMessage.textContent = "Spin result received.";
+    return;
+  }
+
+  playSlotMachine(selectedSlotMachine, results);
+});
+
+socket.on("slotSpinError", (error) => {
+  spinButton.disabled = false;
+  slotMessage.style.display = "block";
+  slotMessage.textContent = error;
+});    
     const playerCount = document.querySelector("#players");
 
     function makeAvatar(color) {
