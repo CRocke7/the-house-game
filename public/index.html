@@ -135,8 +135,18 @@
   
 <script type="module">
     import * as THREE from "three";
-    import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";    const scene = new THREE.Scene();
-    import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";    
+    import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
+    import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
+
+    const scene = new THREE.Scene();
+
+    const playerRadius = 0.45;
+
+    const collidableObjects = [];
+
+    function addCollision(object) {
+      collidableObjects.push(object);
+    }
     
     scene.background = new THREE.Color("#9bc8d9");
     scene.fog = new THREE.Fog("#9bc8d9", 35, 105);
@@ -200,18 +210,34 @@
     };
 
     function box(name, x, y, z, sx, sy, sz, material, cast = true) {
-      const mesh = new THREE.Mesh(
-        new THREE.BoxGeometry(sx, sy, sz), material
-      );
-      mesh.name = name;
-      mesh.position.set(x, y, z);
-      mesh.castShadow = cast;
-      mesh.receiveShadow = true;
-      scene.add(mesh);
-      return mesh;
-    }
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(sx, sy, sz),
+    material
+  );
 
-    // Main casino floor
+  mesh.name = name;
+  mesh.position.set(x, y, z);
+  mesh.castShadow = cast;
+  mesh.receiveShadow = true;
+
+  scene.add(mesh);
+
+  // Register solid objects, but not floors, ceilings, or outdoor scenery.
+  const nonSolid = [
+    "floor",
+    "ceiling",
+    "outdoor ground",
+    "pool"
+  ];
+
+  if (!nonSolid.includes(name)) {
+    addCollision(mesh);
+  }
+
+  return mesh;
+}
+
+  // Main casino floor
     box("floor", 0, -0.25, 0, 44, 0.5, 44, materials.floor, false);
 
     // Walls and architectural columns
@@ -395,19 +421,48 @@
       const delta = Math.min(clock.getDelta(), 0.05);
 
       if (controls.isLocked) {
-        const speed = 7 * delta;
-        if (keys.KeyW) controls.moveForward(speed);
-        if (keys.KeyS) controls.moveForward(-speed);
-        if (keys.KeyA) controls.moveRight(-speed);
-        if (keys.KeyD) controls.moveRight(speed);
+       const speed = 7 * delta;
+       const oldPosition = camera.position.clone();
 
-        camera.position.x = THREE.MathUtils.clamp(camera.position.x, -19, 19);
-        camera.position.z = THREE.MathUtils.clamp(camera.position.z, -19, 19);
-        camera.position.y = 1.7;
+if (keys.KeyW) controls.moveForward(speed);
+if (keys.KeyS) controls.moveForward(-speed);
+if (keys.KeyA) controls.moveRight(-speed);
+if (keys.KeyD) controls.moveRight(speed);
 
+const playerBox = new THREE.Box3();
+const objectBox = new THREE.Box3();
+
+function overlapsObject() {
+  playerBox.min.set(
+    camera.position.x - playerRadius, 0,
+    camera.position.z - playerRadius
+  );
+  playerBox.max.set(
+    camera.position.x + playerRadius, 1.7,
+    camera.position.z + playerRadius
+  );
+
+  for (const object of collidableObjects) {
+    objectBox.setFromObject(object);
+    if (playerBox.intersectsBox(objectBox)) return true;
+  }
+
+  return false;
+}
+
+if (overlapsObject()) {
+  const attemptedPosition = camera.position.clone();
+
+  camera.position.copy(oldPosition);
+  camera.position.x = attemptedPosition.x;
+  if (overlapsObject()) camera.position.x = oldPosition.x;
+
+  camera.position.z = attemptedPosition.z;
+  if (overlapsObject()) camera.position.z = oldPosition.z;
+}
         sendTimer += delta;
         if (sendTimer > 0.06 && socket.connected) {
-          socket.emit("move", {
+          socket.emit("move", { 
             x: camera.position.x,
             z: camera.position.z,
             rotation: camera.rotation.y
