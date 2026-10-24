@@ -1143,23 +1143,20 @@ socket.on("slotSpinError", (error) => {
     }
 
     socket.on("currentPlayers", (players) => {
-      for (const [id, player] of Object.entries(players)) {
-        if (id === socket.id) continue;
-        const avatar = makeAvatar(player.color);
-        avatar.position.set(player.x, 0, player.z);
-        avatar.rotation.y = player.rotation;
-        remotePlayers.set(id, avatar);
-      }
-      updatePlayerCount();
-    });
+  for (const [id, player] of Object.entries(players)) {
+    if (id === socket.id) continue;
 
-    socket.on("playerJoined", ({ id, player }) => {
-      if (id === socket.id || remotePlayers.has(id)) return;
-      const avatar = makeAvatar(player.color);
-      avatar.position.set(player.x, 0, player.z);
-      remotePlayers.set(id, avatar);
-      updatePlayerCount();
-    });
+    // Avoid creating the same avatar twice
+    if (remotePlayers.has(id)) continue;
+
+    const avatar = makeAvatar(player.color);
+    avatar.position.set(player.x, 0, player.z);
+    avatar.rotation.y = player.rotation;
+    remotePlayers.set(id, avatar);
+  }
+
+  updatePlayerCount();
+});
 
     socket.on("playerMoved", ({ id, player }) => {
       const avatar = remotePlayers.get(id);
