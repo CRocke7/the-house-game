@@ -466,19 +466,6 @@
         layout.rotation.x = -Math.PI / 2;
         layout.position.set(x, 1.118, z);
         scene.add(layout);
-        
-        // Green craps felt with betting numbers
-        const layout = new THREE.Mesh(
-          new THREE.PlaneGeometry(3.65, 2.25),
-          new THREE.MeshBasicMaterial({
-            map: createTableLayout(type),
-            side: THREE.DoubleSide
-          })
-        );
-
-        layout.rotation.x = -Math.PI / 2;
-        layout.position.set(x, 1.118, z);
-        scene.add(layout);
       } else {        
         
         // Standard-height roulette and blackjack tables
