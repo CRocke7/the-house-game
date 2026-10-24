@@ -538,52 +538,36 @@
 
   } else if (isRoulette) {
     
-    // Keyhole-shaped roulette table:
-    // round wheel area on the left, betting area on the right.
+    // Oval roulette table:
+    // rounded ends with room for the wheel and betting layout
 
     box("roulette left pedestal", x - 0.55, 0.65, z, 1.5, 1.3, 1.5, materials.dark);
     box("roulette right pedestal", x + 1.1, 0.65, z, 2.0, 1.3, 1.5, materials.dark);
 
-    // Outer gold keyhole shape
-    const tableShape = new THREE.Shape();
+    // Outer gold oval table rim
+const tableShape = new THREE.Shape();
+tableShape.absellipse(0, 0, 2.15, 1.4, 0, Math.PI * 2, false, 0);
 
-    // Start at the bottom of the rectangular section
-    tableShape.moveTo(-0.25, -1.4);
-    tableShape.lineTo(2.15, -1.4);
-    tableShape.lineTo(2.15, 1.4);
-    tableShape.lineTo(-0.25, 1.4);
+const rimGeometry = new THREE.ExtrudeGeometry(tableShape, {
+  depth: 0.16,
+  bevelEnabled: false,
+  curveSegments: 64
+});
 
-    // Curve around the entire left end
-    tableShape.absarc(-0.25, 0, 1.4, Math.PI / 2, -Math.PI / 2, true);
-    tableShape.closePath();
+const rim = new THREE.Mesh(rimGeometry, materials.gold);
+rim.rotation.x = -Math.PI / 2;
+rim.position.set(x, 1.34, z);
+scene.add(rim);
 
-    const rimGeometry = new THREE.ExtrudeGeometry(tableShape, {
-      depth: 0.16,
-      bevelEnabled: false,
-      curveSegments: 64
-    });
+// Green oval felt inset inside the gold rim
+const feltShape = new THREE.Shape();
+feltShape.absellipse(0, 0, 1.99, 1.24, 0, Math.PI * 2, false, 0);
 
-    const rim = new THREE.Mesh(rimGeometry, materials.gold);
-    rim.rotation.x = -Math.PI / 2;
-    rim.position.set(x, 1.34, z);
-    scene.add(rim);
-
-    // Green felt, inset evenly inside the gold rim
-    const feltShape = new THREE.Shape();
-
-    feltShape.moveTo(-0.25, -1.24);
-    feltShape.lineTo(1.99, -1.24);
-    feltShape.lineTo(1.99, 1.24);
-    feltShape.lineTo(-0.25, 1.24);
-
-    feltShape.absarc(-0.25, 0, 1.24, Math.PI / 2, -Math.PI / 2, true);
-    feltShape.closePath();
-
-    const feltGeometry = new THREE.ShapeGeometry(feltShape, 64);
-    const felt = new THREE.Mesh(feltGeometry, topMat);
-    felt.rotation.x = -Math.PI / 2;
-    felt.position.set(x, 1.505, z);
-    scene.add(felt);
+const feltGeometry = new THREE.ShapeGeometry(feltShape, 64);
+const felt = new THREE.Mesh(feltGeometry, topMat);
+felt.rotation.x = -Math.PI / 2;
+felt.position.set(x, 1.505, z);
+scene.add(felt);    
     
     // Betting layout on the rectangular right side
     const layout = new THREE.Mesh(
