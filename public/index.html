@@ -856,7 +856,38 @@
     }
   const remotePlayers = new Map();
 const socket = io();
-const balanceDisplay = document.querySelector("#balance");
+const createRoomButton = document.querySelector("#createRoomButton");
+const joinRoomButton = document.querySelector("#joinRoomButton");
+const roomCodeInput = document.querySelector("#roomCodeInput");
+const roomMenu = document.querySelector("#roomMenu");
+const roomMessage = document.querySelector("#roomMessage");
+
+createRoomButton.addEventListener("click", () => {
+  roomMessage.textContent = "Creating room...";
+  socket.emit("createRoom");
+});
+
+joinRoomButton.addEventListener("click", () => {
+  const code = roomCodeInput.value.trim();
+
+  if (!code) {
+    roomMessage.textContent = "Enter a room code first.";
+    return;
+  }
+
+  roomMessage.textContent = "Joining room...";
+  socket.emit("joinRoom", code);
+});
+
+socket.on("roomJoined", (roomCode) => {
+  roomMessage.textContent = `Room code: ${roomCode}`;
+  roomMenu.style.display = "none";
+});
+
+socket.on("roomError", (message) => {
+  roomMessage.textContent = message;
+});
+  const balanceDisplay = document.querySelector("#balance");
 const slotBetInput = document.querySelector("#slotBet");
 const spinButton = document.querySelector("#spinButton");    
   
