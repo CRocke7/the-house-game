@@ -1229,7 +1229,15 @@ socket.on("playerJoined", ({ id, player }) => {
       remotePlayers.set(id, avatar);
       updatePlayerCount();
     });
-// Jump settings
+  socket.on("playerMoved", ({ id, player }) => {
+  const avatar = remotePlayers.get(id);
+
+  if (!avatar) return;
+
+  avatar.position.set(player.x, 0, player.z);
+  avatar.rotation.y = player.rotation;
+});
+  // Jump settings
 let verticalVelocity = 0;
 const jumpStrength = 7;
 const gravity = 20;
