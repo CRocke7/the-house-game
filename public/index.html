@@ -418,14 +418,87 @@
     }
 
     function casinoTable(x, z, type) {
+      const isCraps = type === "craps";
+      const tableY = isCraps ? 0.95 : 1.5;
       const feltColor = type === "blackjack" ? "#174f70" : "#176447";
       const topMat = mat(feltColor, 0.9);
 
-      box("table pedestal", x, 0.65, z, 1.1, 1.3, 1.1, materials.dark);
-      box("table rim", x, 1.35, z, 4.2, 0.25, 2.8, materials.gold);
-      box("felt top", x, 1.5, z, 3.95, 0.12, 2.55, topMat);
+      if (isCraps) {
+        // Lower, sturdier craps table
+        box("table pedestal", x, 0.45, z, 1.5, 0.9, 1.5, materials.dark);
+        box("table rim", x, 0.95, z, 4.2, 0.25, 2.8, materials.gold);
+        box("felt top", x, 0.99, z, 3.95, 0.12, 2.55, topMat);
 
-      // Printed layout sits just above the felt.
+        // Raised padded walls around the dice area
+        const railMat = materials.dark;
+        const wallY = 1.28;
+        const wallHeight = 0.55;
+        const wallThickness = 0.16;
+
+        box("craps back wall", x, wallY, z - 1.22,
+          3.95, wallHeight, wallThickness, railMat);
+        box("craps front wall", x, wallY, z + 1.22,
+          3.95, wallHeight, wallThickness, railMat);
+        box("craps left wall", x - 1.9, wallY, z,
+          wallThickness, wallHeight, 2.3, railMat);
+        box("craps right wall", x + 1.9, wallY, z,
+          wallThickness, wallHeight, 2.3, railMat);
+
+        // Gold caps along the rails
+        box("craps back rail", x, 1.57, z - 1.22,
+          4.05, 0.08, 0.22, materials.gold);
+        box("craps front rail", x, 1.57, z + 1.22,
+          4.05, 0.08, 0.22, materials.gold);
+        box("craps left rail", x - 1.9, 1.57, z,
+          0.22, 0.08, 2.4, materials.gold);
+        box("craps right rail", x + 1.9, 1.57, z,
+          0.22, 0.08, 2.4, materials.gold);
+
+        // Recessed-looking printed layout
+        const layout = new THREE.Mesh(
+          new THREE.PlaneGeometry(3.65, 2.25),
+          new THREE.MeshBasicMaterial({
+            map: createTableLayout(type),
+            side: THREE.DoubleSide
+          })
+        );
+
+        layout.rotation.x = -Math.PI / 2;
+        layout.position.set(x, 1.055, z);
+        scene.add(layout);
+      } else {
+        // Standard-height roulette and blackjack tables
+        box("table pedestal", x, 0.65, z, 1.1, 1.3, 1.1, materials.dark);
+        box("table rim", x, 1.35, z, 4.2, 0.25, 2.8, materials.gold);
+        box("felt top", x, 1.5, z, 3.95, 0.12, 2.55, topMat);
+
+        const layout = new THREE.Mesh(
+          new THREE.PlaneGeometry(3.85, 2.45),
+          new THREE.MeshBasicMaterial({
+            map: createTableLayout(type),
+            side: THREE.DoubleSide
+          })
+        );
+
+        layout.rotation.x = -Math.PI / 2;
+        layout.position.set(x, 1.565, z);
+        scene.add(layout);
+      }
+
+      // Chairs around each table
+      for (let i = -1; i <= 1; i++) {
+        box(
+          "casino chair",
+          x + i * 2,
+          0.55,
+          z + 2.4,
+          1.05,
+          1.1,
+          0.8,
+          materials.red
+        );
+      }
+    }      // Printed layout sits just above the felt.
       const layout = new THREE.Mesh(
         new THREE.PlaneGeometry(3.85, 2.45),
         new THREE.MeshBasicMaterial({
