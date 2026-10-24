@@ -900,17 +900,31 @@ let isGrounded = true;
 document.addEventListener("keydown", (event) => {
   keys[event.code] = true;
 
-  if (event.code === "Space") {
-    event.preventDefault();
+  if (event.code !== "KeyE" || !controls.isLocked || activeSpin) {
+    return;
+  }
 
-    if (controls.isLocked && isGrounded && !event.repeat) {
-      verticalVelocity = jumpStrength;
-      isGrounded = false;
+  let nearest = null;
+  let nearestDistance = Infinity;
+
+  for (const machine of slotMachines) {
+    const distance = Math.hypot(
+      camera.position.x - machine.x,
+      camera.position.z - (machine.z + 1.2)
+    );
+
+    if (distance < nearestDistance) {
+      nearestDistance = distance;
+      nearest = machine;
     }
+  }
+
+  if (nearest && nearestDistance < 3.2) {
+    playSlotMachine(nearest);
   }
 });
 
-document.addEventListener("keyup", (event) => {
+  document.addEventListener("keyup", (event) => {
   keys[event.code] = false;
 });
     
