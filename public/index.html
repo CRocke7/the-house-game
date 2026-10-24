@@ -903,7 +903,8 @@ function playSlotMachine(machine) {
     // A few simple stylized multiplayer avatars
     const remotePlayers = new Map();
     const socket = io();
-
+    const balanceDisplay = document.querySelector("#balance");
+    
     const playerCount = document.querySelector("#players");
 
     function makeAvatar(color) {
