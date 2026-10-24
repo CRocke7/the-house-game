@@ -265,23 +265,203 @@
     box("desk top", 0, 1.48, -12, 8.3, 0.18, 2, materials.gold);
     box("desk front", 0, 0.85, -11.05, 7.4, 0.8, 0.12, materials.teal);
 
-    // Casino tables
-    function casinoTable(x, z, color) {
-      const topMat = mat(color, 0.75);
+   // Casino tables: Roulette, Blackjack, and Craps
+
+    function createTableLayout(type) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1024;
+      canvas.height = 640;
+
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = type === "blackjack" ? "#174f70" : "#176447";
+      ctx.fillRect(0, 0, 1024, 640);
+
+      ctx.strokeStyle = "#e5d2a0";
+      ctx.lineWidth = 5;
+      ctx.strokeRect(14, 14, 996, 612);
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      if (type === "roulette") {
+        ctx.font = "bold 30px Georgia";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText("ROULETTE", 512, 52);
+
+        const numbers = [
+          [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
+          [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
+          [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34]
+        ];
+
+        const redNumbers = new Set([
+          1, 3, 5, 7, 9, 12, 14, 16, 18,
+          19, 21, 23, 25, 27, 30, 32, 34, 36
+        ]);
+
+        const startX = 85;
+        const startY = 105;
+        const cellW = 65;
+        const cellH = 105;
+
+        // The single green zero
+        ctx.fillStyle = "#168044";
+        ctx.fillRect(20, startY, 62, cellH * 3);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 34px Georgia";
+        ctx.fillText("0", 51, startY + cellH * 1.5);
+
+        for (let row = 0; row < 3; row++) {
+          for (let col = 0; col < 12; col++) {
+            const n = numbers[row][col];
+            const x = startX + col * cellW;
+            const y = startY + row * cellH;
+
+            ctx.fillStyle = redNumbers.has(n) ? "#b82130" : "#17191d";
+            ctx.fillRect(x, y, cellW - 2, cellH - 2);
+
+            ctx.strokeStyle = "#e5d2a0";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, cellW - 2, cellH - 2);
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 27px Georgia";
+            ctx.fillText(String(n), x + cellW / 2, y + cellH / 2);
+          }
+        }
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 27px Georgia";
+        ctx.fillText("2 TO 1", 510, 460);
+        ctx.fillText("RED", 220, 520);
+        ctx.fillText("BLACK", 410, 520);
+        ctx.fillText("EVEN", 600, 520);
+        ctx.fillText("ODD", 790, 520);
+      }
+
+      if (type === "blackjack") {
+        ctx.fillStyle = "#f0d8a0";
+        ctx.font = "bold 52px Georgia";
+        ctx.fillText("BLACKJACK", 512, 90);
+
+        ctx.font = "bold 27px Georgia";
+        ctx.fillText("DEALER", 512, 180);
+
+        // Dealer card illustrations
+        for (let i = 0; i < 2; i++) {
+          const x = 445 + i * 75;
+          ctx.fillStyle = "#f7f2e8";
+          ctx.fillRect(x, 215, 64, 92);
+          ctx.strokeStyle = "#c9b98e";
+          ctx.lineWidth = 3;
+          ctx.strokeRect(x, 215, 64, 92);
+
+          ctx.fillStyle = i === 0 ? "#b82130" : "#17191d";
+          ctx.font = "bold 29px Georgia";
+          ctx.fillText(i === 0 ? "A" : "K", x + 32, 260);
+        }
+
+        ctx.strokeStyle = "#e5d2a0";
+        ctx.lineWidth = 5;
+
+        for (let i = 0; i < 5; i++) {
+          const x = 150 + i * 180;
+          ctx.beginPath();
+          ctx.ellipse(x, 485, 66, 46, 0, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.fillStyle = "#f0d8a0";
+          ctx.font = "bold 23px Georgia";
+          ctx.fillText("BET", x, 485);
+        }
+
+        ctx.font = "bold 25px Georgia";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText("INSURANCE", 512, 380);
+      }
+
+      if (type === "craps") {
+        ctx.fillStyle = "#f0d8a0";
+        ctx.font = "bold 50px Georgia";
+        ctx.fillText("CRAPS", 512, 70);
+
+        ctx.strokeStyle = "#e5d2a0";
+        ctx.lineWidth = 4;
+
+        // Main central betting area
+        ctx.strokeRect(220, 125, 584, 360);
+        ctx.beginPath();
+        ctx.moveTo(220, 305);
+        ctx.lineTo(804, 305);
+        ctx.moveTo(512, 125);
+        ctx.lineTo(512, 485);
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 36px Georgia";
+        ctx.fillText("PASS LINE", 512, 155);
+        ctx.fillText("COME", 365, 245);
+        ctx.fillText("DON'T COME", 660, 245);
+        ctx.fillText("FIELD", 365, 365);
+        ctx.fillText("PLACE BETS", 660, 365);
+        ctx.fillText("PASS LINE", 512, 455);
+
+        ctx.font = "bold 25px Georgia";
+        ctx.fillText("4   5   6   8   9   10", 512, 535);
+      }
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      return texture;
+    }
+
+    function casinoTable(x, z, type) {
+      const feltColor = type === "blackjack" ? "#174f70" : "#176447";
+      const topMat = mat(feltColor, 0.9);
+
       box("table pedestal", x, 0.65, z, 1.1, 1.3, 1.1, materials.dark);
       box("table rim", x, 1.35, z, 4.2, 0.25, 2.8, materials.gold);
       box("felt top", x, 1.5, z, 3.95, 0.12, 2.55, topMat);
 
+      // Printed layout sits just above the felt.
+      const layout = new THREE.Mesh(
+        new THREE.PlaneGeometry(3.85, 2.45),
+        new THREE.MeshBasicMaterial({
+          map: createTableLayout(type),
+          side: THREE.DoubleSide
+        })
+      );
+
+      layout.rotation.x = -Math.PI / 2;
+      layout.position.set(x, 1.565, z);
+      scene.add(layout);
+
+      // Chairs around each table
       for (let i = -1; i <= 1; i++) {
-        box("casino chair", x + i * 2, 0.55, z + 2.4,
-          1.05, 1.1, 0.8, materials.red);
+        box(
+          "casino chair",
+          x + i * 2,
+          0.55,
+          z + 2.4,
+          1.05,
+          1.1,
+          0.8,
+          materials.red
+        );
       }
     }
 
-    casinoTable(-10, -3, "#26735e");
-    casinoTable(0, 3, "#304d7a");
-    casinoTable(10, -3, "#26735e");
+    casinoTable(-10, -3, "roulette");
+    casinoTable(0, 3, "blackjack");
+    casinoTable(10, -3, "craps");
 
+
+
+Step 2: Save and inspect
+1. Save your file.
+2. Refresh the game.
    // Slot machine banks
     function slotMachine(x, z) {
       // Main cabinet and sturdy base
