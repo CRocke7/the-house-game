@@ -804,13 +804,25 @@ const groundY = 2.2; // Your camera's starting height
 let isGrounded = true;    
   
   const keys = {};
-    document.addEventListener("keydown", (event) => {
-      keys[event.code] = true;
-    });
-    document.addEventListener("keyup", (event) => {
-      keys[event.code] = false;
-    });
+    const keys = {};
 
+document.addEventListener("keydown", (event) => {
+  keys[event.code] = true;
+
+  if (event.code === "Space") {
+    event.preventDefault();
+
+    if (controls.isLocked && isGrounded && !event.repeat) {
+      verticalVelocity = jumpStrength;
+      isGrounded = false;
+    }
+  }
+});
+
+document.addEventListener("keyup", (event) => {
+  keys[event.code] = false;
+});
+    
     const clock = new THREE.Clock();
     let sendTimer = 0;
 
