@@ -854,7 +854,7 @@ spinButton.addEventListener("click", () => {
   spinButton.disabled = true;
   socket.emit("slotSpin", bet);
 });
-  function playSlotMachine(machine) {
+  function playSlotMachine(machine, finalResults) {
   if (activeSpin) return;
 
   clearTimeout(messageTimer);
