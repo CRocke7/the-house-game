@@ -17,14 +17,14 @@ const players = {};
 
 io.on("connection", (socket) => {
   players[socket.id] = {
-    x: 0,
-    z: 0,
-    rotation: 0,
-    color: ["#36c5f0", "#ff647c", "#ffd166", "#8b80f9"][
-      Math.floor(Math.random() * 4)
-    ]
-  };
-
+  x: 0,
+  z: 0,
+  rotation: 0,
+  balance: 1000,
+  color: ["#36c5f0", "#ff647c", "#ffd166", "#8b80f9"][
+    Math.floor(Math.random() * 4)
+  ]
+};
   socket.emit("currentPlayers", players);
   socket.broadcast.emit("playerJoined", {
     id: socket.id,
