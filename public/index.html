@@ -660,6 +660,16 @@
 
 
    // Slot machine banks
+    const slotMachines = [];  
+
+    const slotSymbols = [
+      { name: "Cherry", color: "#ff4757" },
+      { name: "Lemon", color: "#ffd166" },
+      { name: "Diamond", color: "#70d6ff" },
+      { name: "Clover", color: "#5ee0a0" },
+      { name: "Seven", color: "#ff4dca" }
+    ];  
+    
     function slotMachine(x, z) {
       // Main cabinet and sturdy base
       box("slot base", x, 0.55, z, 1.4, 1.1, 1.25, materials.dark);
@@ -671,7 +681,9 @@
 
       // Three bright reel windows
       const reelColors = ["#ff647c", "#ffd166", "#5ee0c0"];
-      for (let i = 0; i < 3; i++) {
+      const reels = [];
+
+      for (let i = 0; i < 3; i++) {       
         box(
           "slot reel",
           x - 0.27 + i * 0.27,
@@ -682,8 +694,12 @@
           0.025,
           mat(reelColors[i], 0.35)
         );
+
+        reels.push(scene.children[scene.children.length - 1]);      
       }
 
+      slotMachines.push({ x, z, reels });
+      
       // Control panel and button
       box("slot control panel", x, 1.55, z + 0.58, 0.8, 0.22, 0.12, materials.dark);
 
@@ -707,6 +723,65 @@
     for (let x = -15; x <= 15; x += 3) {
       slotMachine(x, -17);
     }
+    // Slot machine game logic
+const slotMessage = document.querySelector("#slotMessage");
+
+let activeSpin = null;
+let messageTimer = null;
+
+function playSlotMachine(machine) {
+  if (activeSpin) return;
+
+  clearTimeout(messageTimer);
+  slotMessage.style.display = "block";
+  slotMessage.textContent = "🎰 Spinning...";
+
+  const startTime = performance.now();
+  const spinDuration = 1800;
+
+  activeSpin = {
+    update(delta) {
+      const elapsed = performance.now() - startTime;
+
+      if (elapsed < spinDuration) {
+        machine.reels.forEach((reel) => {
+          reel.material.color.set(
+            slotSymbols[Math.floor(Math.random() * slotSymbols.length)].color
+          );
+        });
+        return;
+      }
+
+      const results = machine.reels.map(() =>
+        slotSymbols[Math.floor(Math.random() * slotSymbols.length)]
+      );
+
+      machine.reels.forEach((reel, i) => {
+        reel.material.color.set(results[i].color);
+      });
+
+      if (results.every(s => s.name === results[0].name)) {
+        slotMessage.textContent =
+          `🎉 JACKPOT! ${results[0].name} × 3!`;
+      } else if (
+        results[0].name === results[1].name ||
+        results[1].name === results[2].name ||
+        results[0].name === results[2].name
+      ) {
+        slotMessage.textContent = "✨ Two match! Nice!";
+      } else {
+        slotMessage.textContent = "No match! Try again.";
+      }
+
+      activeSpin = null;
+
+      messageTimer = setTimeout(() => {
+        slotMessage.style.display = "none";
+      }, 3500);
+    }
+  };
+}    
+   
     // Indoor planters
     function planter(x, z) {
       box("planter", x, 0.35, z, 1.7, 0.7, 1.7, materials.dark);
