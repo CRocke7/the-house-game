@@ -796,8 +796,14 @@
         updatePlayerCount();
       }
     });
-
-    const keys = {};
+// Jump settings
+let verticalVelocity = 0;
+const jumpStrength = 7;
+const gravity = 20;
+const groundY = 2.2; // Your camera's starting height
+let isGrounded = true;    
+  
+  const keys = {};
     document.addEventListener("keydown", (event) => {
       keys[event.code] = true;
     });
