@@ -275,7 +275,8 @@
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.15;
     document.body.appendChild(renderer.domElement);
-
+    renderer.domElement.style.display = "none";
+    
     scene.add(new THREE.HemisphereLight("#eaf5ff", "#59604d", 2.0));
 
     const sun = new THREE.DirectionalLight("#ffe0a5", 3.0);
@@ -898,6 +899,7 @@ socket.on("roomJoined", (roomCode) => {
   activeRoomCode.textContent = roomCode;
   roomStatus.style.display = "block";
   roomMenu.style.display = "none";
+  renderer.domElement.style.display = "block";
 });
 
 socket.on("roomError", (message) => {
