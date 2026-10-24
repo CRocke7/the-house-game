@@ -420,7 +420,8 @@
   const wheel = new THREE.Group();
 
   // Position the wheel on the roulette table
-  wheel.position.set(x - 0.72, 1.68, z);
+  wheel.position.set(x - 0.85, 1.59, z);
+  wheel.scale.set(0.72, 0.72, 0.72);  
   
   // Gold outer rim
   const rim = new THREE.Mesh(
