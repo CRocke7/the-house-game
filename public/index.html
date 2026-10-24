@@ -266,26 +266,6 @@
     box("desk front", 0, 0.85, -11.05, 7.4, 0.8, 0.12, materials.teal);
 
    // Casino tables: Roulette, Blackjack, and Craps
-
-  const left = -width / 2;
-  const right = width / 2;
-  const top = height / 2;
-  const bottom = -height / 2;
-
-  radius = Math.min(radius, width / 2, height / 2);
-
-  shape.moveTo(left + radius, bottom);
-  shape.lineTo(right - radius, bottom);
-  shape.quadraticCurveTo(right, bottom, right, bottom + radius);
-  shape.lineTo(right, top - radius);
-  shape.quadraticCurveTo(right, top, right - radius, top);
-  shape.lineTo(left + radius, top);
-  shape.quadraticCurveTo(left, top, left, top - radius);
-  shape.lineTo(left, bottom + radius);
-  shape.quadraticCurveTo(left, bottom, left + radius, bottom);
-
-  return shape;
-}
     
     function createTableLayout(type) {
       const canvas = document.createElement("canvas");
