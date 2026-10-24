@@ -136,7 +136,7 @@ socket.on("joinRoom", (code) => {
     results[1] === results[2] ||
     results[0] === results[2]
   ) {
-    payout = bet * 1.5;
+    payout = Math.floor(bet * 1.5);
   }
 
   player.balance += payout;
@@ -174,7 +174,6 @@ socket.on("joinRoom", (code) => {
 
   delete players[socket.id];
   delete playerRooms[socket.id];
-  delete recoveryCooldowns[socket.id];
 
   if (roomCode) {
     socket.to(roomCode).emit("playerLeft", socket.id);
