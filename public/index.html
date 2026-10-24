@@ -860,7 +860,7 @@ spinButton.addEventListener("click", () => {
   spinButton.disabled = true;
   socket.emit("slotSpin", bet);
 });  
-  function playSlotMachine(machine, finalResults) {
+  function playSlotMachine(machine, finalResults, payout, bet) {
   if (activeSpin) return;
 
   clearTimeout(messageTimer);
@@ -998,7 +998,7 @@ spinButton.addEventListener("click", () => {
     return;
   }
 
-  playSlotMachine(selectedSlotMachine, results);
+  playSlotMachine(selectedSlotMachine, results, payout, bet);
 });
 
 socket.on("slotSpinError", (error) => {
