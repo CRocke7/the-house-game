@@ -868,6 +868,16 @@ spinButton.addEventListener("click", () => {
 
   spinButton.disabled = true;
   socket.emit("slotSpin", bet);
+}); 
+  recoveryButton.addEventListener("click", () => {
+  recoveryButton.disabled = true;
+  socket.emit("claimRecovery");
+});
+
+socket.on("recoveryMessage", (message) => {
+  slotMessage.style.display = "block";
+  slotMessage.textContent = message;
+  recoveryButton.disabled = false;
 });  
   function playSlotMachine(machine, finalResults, payout, bet) {
   if (activeSpin) return;
