@@ -865,7 +865,18 @@ const joinRoomButton = document.querySelector("#joinRoomButton");
 const roomCodeInput = document.querySelector("#roomCodeInput");
 const roomMenu = document.querySelector("#roomMenu");
 const roomMessage = document.querySelector("#roomMessage");
+const roomStatus = document.querySelector("#roomStatus");
+const activeRoomCode = document.querySelector("#activeRoomCode");
+const copyRoomCodeButton = document.querySelector("#copyRoomCodeButton");
 
+copyRoomCodeButton.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(activeRoomCode.textContent);
+    copyRoomCodeButton.textContent = "COPIED!";
+  } catch {
+    roomMessage.textContent = "Couldn't copy automatically. Copy the code manually.";
+  }
+});
 createRoomButton.addEventListener("click", () => {
   roomMessage.textContent = "Creating room...";
   socket.emit("createRoom");
@@ -884,7 +895,8 @@ joinRoomButton.addEventListener("click", () => {
 });
 
 socket.on("roomJoined", (roomCode) => {
-  roomMessage.textContent = `Room code: ${roomCode}`;
+  activeRoomCode.textContent = roomCode;
+  roomStatus.style.display = "block";
   roomMenu.style.display = "none";
 });
 
