@@ -827,7 +827,13 @@
     for (let x = -15; x <= 15; x += 3) {
       slotMachine(x, -17);
     }
-    // Slot machine game logic
+  const remotePlayers = new Map();
+const socket = io();
+const balanceDisplay = document.querySelector("#balance");
+const slotBetInput = document.querySelector("#slotBet");
+const spinButton = document.querySelector("#spinButton");    
+  
+  // Slot machine game logic
 const slotMessage = document.querySelector("#slotMessage");
 
 let activeSpin = null;
@@ -967,11 +973,7 @@ spinButton.addEventListener("click", () => {
     }
 
     // A few simple stylized multiplayer avatars
-    const remotePlayers = new Map();
-    const socket = io();
-    const balanceDisplay = document.querySelector("#balance");
-    const slotBetInput = document.querySelector("#slotBet");
-    const spinButton = document.querySelector("#spinButton");  
+    
     
     socket.on("balanceUpdate", (balance) => {
       balanceDisplay.textContent = `Balance: $${balance.toLocaleString()}`;
