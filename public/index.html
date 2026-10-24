@@ -1100,7 +1100,8 @@ document.addEventListener("keydown", (event) => {
 
   if (nearest && nearestDistance < 3.2) {
     selectedSlotMachine = nearest;
-    playSlotMachine(nearest);
+    slotMessage.style.display = "block";
+    slotMessage.textContent = "Machine selected! Choose your bet and press SPIN.";
   }
 });
 
