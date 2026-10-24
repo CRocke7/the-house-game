@@ -833,7 +833,21 @@ const slotMessage = document.querySelector("#slotMessage");
 let activeSpin = null;
 let messageTimer = null;
 
-function playSlotMachine(machine) {
+spinButton.addEventListener("click", () => {
+  const bet = Number(slotBetInput.value);
+
+  if (!Number.isInteger(bet) || bet < 100) {
+    slotMessage.style.display = "block";
+    slotMessage.textContent = "Minimum bet is $100.";
+    return;
+  }
+
+  if (activeSpin) return;
+
+  spinButton.disabled = true;
+  socket.emit("slotSpin", bet);
+});
+  function playSlotMachine(machine) {
   if (activeSpin) return;
 
   clearTimeout(messageTimer);
