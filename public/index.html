@@ -850,7 +850,8 @@ let selectedSlotMachine = null;
 
 spinButton.addEventListener("click", () => {
   const bet = Number(slotBetInput.value);
-
+  const recoveryButton = document.querySelector("#recoveryButton");
+  
   if (!Number.isInteger(bet) || bet < 100) {
     slotMessage.style.display = "block";
     slotMessage.textContent = "Minimum bet is $100.";
@@ -998,8 +999,9 @@ if (results.every(s => s.name === results[0].name)) {
     
     
     socket.on("balanceUpdate", (balance) => {
-      balanceDisplay.textContent = `Balance: $${balance.toLocaleString()}`;
-    });
+  balanceDisplay.textContent = `Balance: $${balance.toLocaleString()}`;
+  recoveryButton.style.display = balance <= 0 ? "block" : "none";
+});
   
   socket.on("slotSpinResult", ({ results, payout, bet }) => {
   spinButton.disabled = false;
