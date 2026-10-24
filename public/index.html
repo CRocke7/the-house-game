@@ -682,22 +682,55 @@
       // Three bright reel windows
       const reelColors = ["#ff647c", "#ffd166", "#5ee0c0"];
       const reels = [];
+      const reelSymbols = ["🍒", "🍋", "💎", "🍀", "7️⃣"];
+      
+     for (let i = 0; i < 3; i++) {
+  const reel = box(
+    "slot reel",
+    x - 0.27 + i * 0.27,
+    2.25,
+    z + 0.665,
+    0.22,
+    0.48,
+    0.025,
+    mat(reelColors[i], 0.35)
+  );
 
-      for (let i = 0; i < 3; i++) {       
-        box(
-          "slot reel",
-          x - 0.27 + i * 0.27,
-          2.25,
-          z + 0.665,
-          0.22,
-          0.48,
-          0.025,
-          mat(reelColors[i], 0.35)
-        );
+  reels.push(reel);
 
-        reels.push(scene.children[scene.children.length - 1]);      
-      }
+  // Draw a symbol on the front of the reel
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 256;
 
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, 256, 256);
+  ctx.font = "150px serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(reelSymbols[i], 128, 128);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+
+  const symbol = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.20, 0.42),
+    new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true
+    })
+  );
+
+  symbol.position.set(
+    x - 0.27 + i * 0.27,
+    2.25,
+    z + 0.681
+  );
+
+  scene.add(symbol);
+}
+      
       slotMachines.push({ x, z, reels });
       
       // Control panel and button
