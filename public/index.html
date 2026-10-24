@@ -776,40 +776,55 @@ function playSlotMachine(machine) {
   const startTime = performance.now();
   const spinDuration = 1800;
 
+  const symbols = {
+    Cherry: "🍒",
+    Lemon: "🍋",
+    Diamond: "💎",
+    Clover: "🍀",
+    Seven: "7️⃣"
+  };
+
+  function updateReel(reel, result) {
+    reel.material.color.set(result.color);
+
+    const ctx = reel.userData.symbolContext;
+    ctx.clearRect(0, 0, 256, 256);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, 256, 256);
+
+    ctx.font = "150px serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(symbols[result.name], 128, 128);
+
+    reel.userData.symbolTexture.needsUpdate = true;
+  }
+
   activeSpin = {
     update(delta) {
       const elapsed = performance.now() - startTime;
 
       if (elapsed < spinDuration) {
         machine.reels.forEach((reel) => {
-  const symbol =
-    slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+          const symbol =
+            slotSymbols[
+              Math.floor(Math.random() * slotSymbols.length)
+            ];
 
-  reel.material.color.set(symbol.color);
+          updateReel(reel, symbol);
+        });
 
-  const ctx = reel.userData.symbolContext;
-  ctx.clearRect(0, 0, 256, 256);
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, 256, 256);
-  ctx.font = "150px serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(symbol.name === "Seven" ? "7" :
-    symbol.name === "Cherry" ? "🍒" :
-    symbol.name === "Lemon" ? "🍋" :
-    symbol.name === "Diamond" ? "💎" : "🍀", 128, 128);
-
-  reel.userData.symbolTexture.needsUpdate = true;
-});        
         return;
       }
 
       const results = machine.reels.map(() =>
-        slotSymbols[Math.floor(Math.random() * slotSymbols.length)]
+        slotSymbols[
+          Math.floor(Math.random() * slotSymbols.length)
+        ]
       );
 
       machine.reels.forEach((reel, i) => {
-        reel.material.color.set(results[i].color);
+        updateReel(reel, results[i]);
       });
 
       if (results.every(s => s.name === results[0].name)) {
@@ -832,9 +847,9 @@ function playSlotMachine(machine) {
       }, 3500);
     }
   };
-}    
+}   
    
-    // Indoor planters
+     // Indoor planters
     function planter(x, z) {
       box("planter", x, 0.35, z, 1.7, 0.7, 1.7, materials.dark);
       const trunk = new THREE.Mesh(
