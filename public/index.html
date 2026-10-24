@@ -904,6 +904,10 @@ function playSlotMachine(machine) {
     const remotePlayers = new Map();
     const socket = io();
     const balanceDisplay = document.querySelector("#balance");
+  
+    socket.on("balanceUpdate", (balance) => {
+      balanceDisplay.textContent = `Balance: $${balance.toLocaleString()}`;
+    });    
     
     const playerCount = document.querySelector("#players");
 
