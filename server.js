@@ -77,12 +77,6 @@ socket.on("joinRoom", (code) => {
     player: players[socket.id]
   });
 });  
-  if (playerRooms[socket.id]) {
-  socket.to(playerRooms[socket.id]).emit("playerJoined", {
-    id: socket.id,
-    player: players[socket.id]
-  });
-}
 
   socket.on("move", (position) => {
     if (!players[socket.id]) return;
