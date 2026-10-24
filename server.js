@@ -14,6 +14,8 @@ app.get("/", (req, res) => {
 });
 
 const players = {};
+const playerRooms = {};
+const rooms = new Set();
 const recoveryCooldowns = {};
 
 io.on("connection", (socket) => {
@@ -29,12 +31,59 @@ io.on("connection", (socket) => {
   };
   
   socket.emit("currentPlayers", players);
-  socket.emit("balanceUpdate", players[socket.id].balance);  
-  
-  socket.broadcast.emit("playerJoined", {
+  socket.emit("balanceUpdate", players[socket.id].balance); 
+  socket.on("createRoom", () => {
+  let roomCode;
+
+  do {
+    roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+  } while (rooms.has(roomCode));
+
+  rooms.add(roomCode);
+  playerRooms[socket.id] = roomCode;
+  socket.join(roomCode);
+
+  socket.emit("roomJoined", roomCode);
+});
+
+socket.on("joinRoom", (code) => {
+  if (typeof code !== "string") {
+    socket.emit("roomError", "Enter a valid room code.");
+    return;
+  }
+
+  const roomCode = code.trim().toUpperCase();
+
+  if (!rooms.has(roomCode)) {
+    socket.emit("roomError", "That room doesn't exist. Check the code and try again.");
+    return;
+  }
+
+  const existingPlayers = {};
+
+  for (const [id, player] of Object.entries(players)) {
+    if (playerRooms[id] === roomCode) {
+      existingPlayers[id] = player;
+    }
+  }
+
+  playerRooms[socket.id] = roomCode;
+  socket.join(roomCode);
+
+  socket.emit("currentPlayers", existingPlayers);
+  socket.emit("roomJoined", roomCode);
+
+  socket.to(roomCode).emit("playerJoined", {
     id: socket.id,
     player: players[socket.id]
   });
+});  
+  if (playerRooms[socket.id]) {
+  socket.to(playerRooms[socket.id]).emit("playerJoined", {
+    id: socket.id,
+    player: players[socket.id]
+  });
+}
 
   socket.on("move", (position) => {
     if (!players[socket.id]) return;
@@ -54,7 +103,7 @@ io.on("connection", (socket) => {
     players[socket.id].z = Math.max(-45, Math.min(45, z));
     players[socket.id].rotation = rotation;
 
-    socket.broadcast.emit("playerMoved", {
+    socket.to(playerRooms[socket.id]).emit("playerMoved", {
       id: socket.id,
       player: players[socket.id]
     });
@@ -126,11 +175,22 @@ io.on("connection", (socket) => {
   socket.emit("recoveryMessage", "Recovery allowance claimed! You received $500.");
 });  
   socket.on("disconnect", () => {
-    delete players[socket.id];
-    io.emit("playerLeft", socket.id);
-  });
-});
+  const roomCode = playerRooms[socket.id];
 
+  delete players[socket.id];
+  delete playerRooms[socket.id];
+  delete recoveryCooldowns[socket.id];
+
+  if (roomCode) {
+    socket.to(roomCode).emit("playerLeft", socket.id);
+
+    const roomStillExists = Object.values(playerRooms).includes(roomCode);
+
+    if (!roomStillExists) {
+      rooms.delete(roomCode);
+    }
+  }
+});
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, "0.0.0.0", () => {
