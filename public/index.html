@@ -905,12 +905,16 @@ spinButton.addEventListener("click", () => {
         return;
       }
 
-      const results = machine.reels.map(() =>
-        slotSymbols[
-          Math.floor(Math.random() * slotSymbols.length)
-        ]
-      );
-
+     const results = finalResults
+  ? finalResults.map(name =>
+      slotSymbols.find(symbol => symbol.name === name)
+    )
+  : machine.reels.map(() =>
+      slotSymbols[
+        Math.floor(Math.random() * slotSymbols.length)
+      ]
+    );
+      
       machine.reels.forEach((reel, i) => {
         updateReel(reel, results[i]);
       });
