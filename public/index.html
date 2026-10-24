@@ -33,6 +33,52 @@
   font-weight: bold;
   letter-spacing: 0.5px;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+} 
+    #slotBetPanel {
+  position: fixed;
+  left: 24px;
+  bottom: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 180px;
+  padding: 14px;
+  background: rgba(12, 16, 20, 0.94);
+  border: 1px solid #c9a44c;
+  border-radius: 10px;
+  color: #ffffff;
+  pointer-events: auto;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+}
+
+#slotBetPanel label {
+  font-size: 13px;
+  color: #d8c58b;
+}
+
+#slotBet {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 9px;
+  border: 1px solid #78652f;
+  border-radius: 5px;
+  background: #20262d;
+  color: #ffffff;
+  font-size: 16px;
+}
+
+#spinButton {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background: #c9a44c;
+  color: #171717;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#spinButton:hover {
+  background: #e4c56e;
 }    
     #brand {
       position: absolute;
@@ -137,7 +183,12 @@
     <div id="brand">THE HOUSE</div>
     <div id="status">CASINO RESORT · PRE-RELEASE</div>
     <div id="players">Players online: 1</div>
-    <div id="balance">Balance: $1,000</div>    
+    <div id="balance">Balance: $1,000</div>
+    <div id="slotBetPanel">
+      <label for="slotBet">Bet amount</label>
+      <input id="slotBet" type="number" min="100" step="100" value="100">
+      <button id="spinButton">SPIN</button>
+    </div>    
     <div id="crosshair"></div>
     <div id="slotMessage"></div>    
     <div id="help">
