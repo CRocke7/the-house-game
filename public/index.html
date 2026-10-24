@@ -729,6 +729,10 @@
   );
 
   scene.add(symbol);
+  reel.userData.symbolMesh = symbol;
+  reel.userData.symbolCanvas = canvas;
+  reel.userData.symbolContext = ctx;
+  reel.userData.symbolTexture = texture;
 }
       
       slotMachines.push({ x, z, reels });
@@ -778,10 +782,25 @@ function playSlotMachine(machine) {
 
       if (elapsed < spinDuration) {
         machine.reels.forEach((reel) => {
-          reel.material.color.set(
-            slotSymbols[Math.floor(Math.random() * slotSymbols.length)].color
-          );
-        });
+  const symbol =
+    slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+
+  reel.material.color.set(symbol.color);
+
+  const ctx = reel.userData.symbolContext;
+  ctx.clearRect(0, 0, 256, 256);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, 256, 256);
+  ctx.font = "150px serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(symbol.name === "Seven" ? "7" :
+    symbol.name === "Cherry" ? "🍒" :
+    symbol.name === "Lemon" ? "🍋" :
+    symbol.name === "Diamond" ? "💎" : "🍀", 128, 128);
+
+  reel.userData.symbolTexture.needsUpdate = true;
+});        
         return;
       }
 
