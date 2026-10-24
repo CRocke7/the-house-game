@@ -936,6 +936,8 @@ document.addEventListener("keydown", (event) => {
 
       const delta = Math.min(clock.getDelta(), 0.05);
 
+      if (activeSpin) activeSpin.update(delta);
+      
       // Apply gravity and vertical movement
       verticalVelocity -= gravity * delta;
       camera.position.y += verticalVelocity * delta;
