@@ -416,7 +416,87 @@
       texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
       return texture;
     }
+  function createRouletteWheel(x, z) {
+  const wheel = new THREE.Group();
 
+  // Position the wheel on the roulette table
+  wheel.position.set(x - 0.72, 1.68, z);
+  
+  // Gold outer rim
+  const rim = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.76, 0.76, 0.14, 48),
+    materials.gold
+  );
+  wheel.add(rim);
+
+  // Dark wooden wheel body
+  const body = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.67, 0.67, 0.14, 48),
+    materials.dark
+  );
+  body.position.y = -0.08;
+  wheel.add(body);
+
+  // Numbered red, black, and green pockets
+  const redNumbers = new Set([
+    1, 3, 5, 7, 9, 12, 14, 16, 18,
+    19, 21, 23, 25, 27, 30, 32, 34, 36
+  ]);
+
+  for (let i = 0; i < 37; i++) {
+    const angle = (i / 37) * Math.PI * 2;
+    const color =
+      i === 0 ? "#168044" :
+      redNumbers.has(i) ? "#b82130" : "#17191d";
+
+    const pocket = new THREE.Mesh(
+      new THREE.BoxGeometry(0.085, 0.035, 0.16),
+      mat(color, 0.45)
+    );
+
+    pocket.position.set(
+      Math.sin(angle) * 0.48,
+      0.015,
+      Math.cos(angle) * 0.48
+    );
+
+    pocket.rotation.y = angle;
+    wheel.add(pocket);
+
+    // Small gold number markers
+    const number = new THREE.Mesh(
+      new THREE.BoxGeometry(0.045, 0.012, 0.07),
+      materials.gold
+    );
+
+    number.position.set(
+      Math.sin(angle) * 0.48,
+      0.04,
+      Math.cos(angle) * 0.48
+    );
+
+    number.rotation.y = angle;
+    wheel.add(number);
+  }
+
+  // Raised gold center
+  const spindle = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.14, 0.22, 0.18, 24),
+    materials.gold
+  );
+  spindle.position.y = 0.06;
+  wheel.add(spindle);
+
+  const center = new THREE.Mesh(
+    new THREE.SphereGeometry(0.13, 20, 16),
+    materials.gold
+  );
+  center.position.y = 0.16;
+  wheel.add(center);
+
+  scene.add(wheel);
+  return wheel;
+}
     function casinoTable(x, z, type) {
       const isCraps = type === "craps";
       const tableY = isCraps ? 0.95 : 1.5;
