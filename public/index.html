@@ -925,18 +925,22 @@ spinButton.addEventListener("click", () => {
         updateReel(reel, results[i]);
       });
 
-      if (results.every(s => s.name === results[0].name)) {
-        slotMessage.textContent =
-          `🎉 JACKPOT! ${results[0].name} × 3!`;
-      } else if (
-        results[0].name === results[1].name ||
-        results[1].name === results[2].name ||
-        results[0].name === results[2].name
-      ) {
-        slotMessage.textContent = "✨ Two match! Nice!";
-      } else {
-        slotMessage.textContent = "No match! Try again.";
-      }
+      const won = payout > 0;
+
+if (results.every(s => s.name === results[0].name)) {
+  slotMessage.textContent =
+    `🎉 JACKPOT! ${results[0].name} × 3! You won $${payout.toLocaleString()}!`;
+} else if (
+  results[0].name === results[1].name ||
+  results[1].name === results[2].name ||
+  results[0].name === results[2].name
+) {
+  slotMessage.textContent = won
+    ? `✨ Two match! You won $${payout.toLocaleString()}!`
+    : "Two match, but no payout.";
+} else {
+  slotMessage.textContent = `No match! You lost $${bet.toLocaleString()}.`;
+}
 
       activeSpin = null;
 
