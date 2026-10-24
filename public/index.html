@@ -282,21 +282,54 @@
     casinoTable(0, 3, "#304d7a");
     casinoTable(10, -3, "#26735e");
 
-    // Slot machine banks
+   // Slot machine banks
     function slotMachine(x, z) {
-      box("slot base", x, 0.6, z, 1.4, 1.2, 1.2, materials.dark);
-      box("slot cabinet", x, 1.9, z, 1.3, 1.6, 1, materials.teal);
-      box("slot screen", x, 2.1, z + 0.53, 0.9, 0.7, 0.08, materials.dark);
-      box("slot trim", x, 2.65, z + 0.55, 1.05, 0.12, 0.1, materials.gold);
-      const lamp = new THREE.PointLight("#f4c86a", 0.7, 3);
-      lamp.position.set(x, 2.8, z);
+      // Main cabinet and sturdy base
+      box("slot base", x, 0.55, z, 1.4, 1.1, 1.25, materials.dark);
+      box("slot cabinet", x, 1.65, z, 1.25, 1.35, 1.05, materials.teal);
+
+      // Gold frame around the screen
+      box("slot screen frame", x, 2.25, z + 0.56, 1.05, 0.82, 0.12, materials.gold);
+      box("slot screen", x, 2.25, z + 0.635, 0.88, 0.64, 0.04, mat("#241c3c", 0.25));
+
+      // Three bright reel windows
+      const reelColors = ["#ff647c", "#ffd166", "#5ee0c0"];
+      for (let i = 0; i < 3; i++) {
+        box(
+          "slot reel",
+          x - 0.27 + i * 0.27,
+          2.25,
+          z + 0.665,
+          0.22,
+          0.48,
+          0.025,
+          mat(reelColors[i], 0.35)
+        );
+      }
+
+      // Control panel and button
+      box("slot control panel", x, 1.55, z + 0.58, 0.8, 0.22, 0.12, materials.dark);
+
+      const button = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.09, 0.09, 0.06, 16),
+        materials.red
+      );
+      button.rotation.x = Math.PI / 2;
+      button.position.set(x, 1.55, z + 0.68);
+      scene.add(button);
+
+      // Decorative gold trim
+      box("slot top trim", x, 2.93, z, 1.35, 0.12, 1.12, materials.gold);
+
+      // Soft light in front of the machine
+      const lamp = new THREE.PointLight("#f4c86a", 1.1, 3.5);
+      lamp.position.set(x, 2.5, z + 0.9);
       scene.add(lamp);
     }
 
     for (let x = -15; x <= 15; x += 3) {
       slotMachine(x, -17);
     }
-
     // Indoor planters
     function planter(x, z) {
       box("planter", x, 0.35, z, 1.7, 0.7, 1.7, materials.dark);
