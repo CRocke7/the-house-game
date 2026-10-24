@@ -421,8 +421,7 @@
 
   // Position the wheel on the roulette table
   wheel.position.set(x - 0.85, 1.59, z);
-  wheel.scale.set(0.72, 0.72, 0.72);  
-  
+ 
   // Gold outer rim
   const rim = new THREE.Mesh(
     new THREE.CylinderGeometry(0.76, 0.76, 0.14, 48),
@@ -547,7 +546,7 @@
         layout.rotation.x = -Math.PI / 2;
         layout.position.set(x, 1.118, z);
         scene.add(layout);
-      } else {        
+        } else if (type === "roulette") {
         
         // Standard-height roulette and blackjack tables
         box("table pedestal", x, 0.65, z, 1.1, 1.3, 1.1, materials.dark);
