@@ -849,11 +849,17 @@ spinButton.addEventListener("click", () => {
     return;
   }
 
-  if (activeSpin) return;
+  if (!selectedSlotMachine) {
+    slotMessage.style.display = "block";
+    slotMessage.textContent = "Walk up to a slot machine and press E first.";
+    return;
+  }
+
+  if (activeSpin || spinButton.disabled) return;
 
   spinButton.disabled = true;
   socket.emit("slotSpin", bet);
-});
+});  
   function playSlotMachine(machine, finalResults) {
   if (activeSpin) return;
 
