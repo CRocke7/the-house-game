@@ -498,122 +498,90 @@
   return wheel;
 }
     function casinoTable(x, z, type) {
-      const isCraps = type === "craps";
-      const tableY = isCraps ? 0.95 : 1.5;
-      const feltColor = type === "blackjack" ? "#174f70" : "#176447";
-      const topMat = mat(feltColor, 0.9);
+  const isCraps = type === "craps";
+  const isRoulette = type === "roulette";
+  const feltColor = type === "blackjack" ? "#174f70" : "#176447";
+  const topMat = mat(feltColor, 0.9);
 
-      if (isCraps) {
-        // Lower, sturdier craps table
-        box("table pedestal", x, 0.45, z, 1.5, 0.9, 1.5, materials.dark);
-        box("table rim", x, 0.95, z, 4.2, 0.25, 2.8, materials.gold);
-        box("felt top", x, 1.075, z, 3.65, 0.08, 2.25, topMat);
-        
-        // Raised padded walls around the dice area
-        const railMat = materials.dark;
-        const wallY = 1.28;
-        const wallHeight = 0.55;
-        const wallThickness = 0.16;
+  if (isCraps) {
+    // Craps table base and felt
+    box("table pedestal", x, 0.45, z, 1.5, 0.9, 1.5, materials.dark);
+    box("table rim", x, 0.95, z, 4.2, 0.25, 2.8, materials.gold);
+    box("felt top", x, 1.075, z, 3.65, 0.08, 2.25, topMat);
 
-        box("craps back wall", x, wallY, z - 1.22,
-          3.95, wallHeight, wallThickness, railMat);
-        box("craps front wall", x, wallY, z + 1.22,
-          3.95, wallHeight, wallThickness, railMat);
-        box("craps left wall", x - 1.9, wallY, z,
-          wallThickness, wallHeight, 2.3, railMat);
-        box("craps right wall", x + 1.9, wallY, z,
-          wallThickness, wallHeight, 2.3, railMat);
+    // Raised padded walls
+    const wallY = 1.28;
+    const wallHeight = 0.55;
+    const wallThickness = 0.16;
 
-        // Gold caps along the rails
-        box("craps back rail", x, 1.57, z - 1.22,
-          4.05, 0.08, 0.22, materials.gold);
-        box("craps front rail", x, 1.57, z + 1.22,
-          4.05, 0.08, 0.22, materials.gold);
-        box("craps left rail", x - 1.9, 1.57, z,
-          0.22, 0.08, 2.4, materials.gold);
-        box("craps right rail", x + 1.9, 1.57, z,
-          0.22, 0.08, 2.4, materials.gold);
+    box("craps back wall", x, wallY, z - 1.22, 3.95, wallHeight, wallThickness, materials.dark);
+    box("craps front wall", x, wallY, z + 1.22, 3.95, wallHeight, wallThickness, materials.dark);
+    box("craps left wall", x - 1.9, wallY, z, wallThickness, wallHeight, 2.3, materials.dark);
+    box("craps right wall", x + 1.9, wallY, z, wallThickness, wallHeight, 2.3, materials.dark);
 
-        // Green craps felt with betting numbers
-        const layout = new THREE.Mesh(
-          new THREE.PlaneGeometry(3.65, 2.25),
-          new THREE.MeshBasicMaterial({
-            map: createTableLayout(type),
-            side: THREE.DoubleSide
-          })
-        );
+    // Gold rail caps
+    box("craps back rail", x, 1.57, z - 1.22, 4.05, 0.08, 0.22, materials.gold);
+    box("craps front rail", x, 1.57, z + 1.22, 4.05, 0.08, 0.22, materials.gold);
+    box("craps left rail", x - 1.9, 1.57, z, 0.22, 0.08, 2.4, materials.gold);
+    box("craps right rail", x + 1.9, 1.57, z, 0.22, 0.08, 2.4, materials.gold);
 
-        layout.rotation.x = -Math.PI / 2;
-        layout.position.set(x, 1.118, z);
-        scene.add(layout);
-        } else if (type === "roulette") {
-
-    // Keyhole roulette table: round wheel area on the left,
-    // rectangular betting area on the right.
-
-    // Pedestal supports
-    box(
-      "roulette left pedestal",
-      x - 0.55, 0.65, z,
-      1.5, 1.3, 1.5,
-      materials.dark
+    const layout = new THREE.Mesh(
+      new THREE.PlaneGeometry(3.65, 2.25),
+      new THREE.MeshBasicMaterial({
+        map: createTableLayout(type),
+        side: THREE.DoubleSide
+      })
     );
+    layout.rotation.x = -Math.PI / 2;
+    layout.position.set(x, 1.118, z);
+    scene.add(layout);
 
-    box(
-      "roulette right pedestal",
-      x + 1.1, 0.65, z,
-      2.0, 1.3, 1.5,
-      materials.dark
-    );
+  } else if (isRoulette) {
+    // Keyhole-shaped roulette table:
+    // round wheel area on the left, betting area on the right.
 
-    // Outer gold keyhole-shaped rim
+    box("roulette left pedestal", x - 0.55, 0.65, z, 1.5, 1.3, 1.5, materials.dark);
+    box("roulette right pedestal", x + 1.1, 0.65, z, 2.0, 1.3, 1.5, materials.dark);
+
+    // Outer gold shape
     const tableShape = new THREE.Shape();
-
     tableShape.moveTo(-0.25, -1.4);
     tableShape.lineTo(2.15, -1.4);
     tableShape.lineTo(2.15, 1.4);
     tableShape.lineTo(-0.25, 1.4);
-    tableShape.absarc(
-      -0.25, 0, 1.4,
-      Math.PI / 2,
-      -Math.PI / 2,
-      true
-    );
+    tableShape.absarc(-0.25, 0, 1.4, Math.PI / 2, -Math.PI / 2, true);
     tableShape.closePath();
 
-    const rimGeometry = new THREE.ExtrudeGeometry(tableShape, {
-      depth: 0.16,
-      bevelEnabled: false,
-      curveSegments: 48
-    });
-
-    const rim = new THREE.Mesh(rimGeometry, materials.gold);
+    const rim = new THREE.Mesh(
+      new THREE.ExtrudeGeometry(tableShape, {
+        depth: 0.16,
+        bevelEnabled: false,
+        curveSegments: 48
+      }),
+      materials.gold
+    );
     rim.rotation.x = -Math.PI / 2;
     rim.position.set(x, 1.34, z);
     scene.add(rim);
 
     // Green felt inset
     const feltShape = new THREE.Shape();
-
     feltShape.moveTo(-0.25, -1.25);
     feltShape.lineTo(2.0, -1.25);
     feltShape.lineTo(2.0, 1.25);
     feltShape.lineTo(-0.25, 1.25);
-    feltShape.absarc(
-      -0.25, 0, 1.25,
-      Math.PI / 2,
-      -Math.PI / 2,
-      true
-    );
+    feltShape.absarc(-0.25, 0, 1.25, Math.PI / 2, -Math.PI / 2, true);
     feltShape.closePath();
 
-    const feltGeometry = new THREE.ShapeGeometry(feltShape, 48);
-    const felt = new THREE.Mesh(feltGeometry, topMat);
+    const felt = new THREE.Mesh(
+      new THREE.ShapeGeometry(feltShape, 48),
+      topMat
+    );
     felt.rotation.x = -Math.PI / 2;
     felt.position.set(x, 1.505, z);
     scene.add(felt);
 
-    // Betting print: right-hand rectangular section
+    // Betting layout on the rectangular right side
     const layout = new THREE.Mesh(
       new THREE.PlaneGeometry(2.0, 2.1),
       new THREE.MeshBasicMaterial({
@@ -621,35 +589,45 @@
         side: THREE.DoubleSide
       })
     );
-
     layout.rotation.x = -Math.PI / 2;
     layout.position.set(x + 0.95, 1.515, z);
     scene.add(layout);
 
-    // Full-size roulette wheel: circular section on the left
-    createRouletteWheel(x, z);        
-       
-     // Chairs around each table
-for (let i = -1; i <= 1; i++) {
-  box(
-    "casino chair",
-    x + i * 2,
-    0.55,
-    z + 2.4,
-    1.05,
-    1.1,
-    0.8,
-    materials.red
-  );
-}
+    // One wheel, positioned in the round left section
+    createRouletteWheel(x, z);
 
-// Add the roulette wheel only to the roulette table
-if (type === "roulette") {
-  createRouletteWheel(x, z);
-}   
+  } else {
+    // Standard blackjack table
+    box("table pedestal", x, 0.65, z, 1.1, 1.3, 1.1, materials.dark);
+    box("table rim", x, 1.35, z, 4.2, 0.25, 2.8, materials.gold);
+    box("felt top", x, 1.5, z, 3.95, 0.12, 2.55, topMat);
 
-} // End of casinoTable()
-    
+    const layout = new THREE.Mesh(
+      new THREE.PlaneGeometry(3.85, 2.45),
+      new THREE.MeshBasicMaterial({
+        map: createTableLayout(type),
+        side: THREE.DoubleSide
+      })
+    );
+    layout.rotation.x = -Math.PI / 2;
+    layout.position.set(x, 1.565, z);
+    scene.add(layout);
+  }
+
+  // Chairs around every table
+  for (let i = -1; i <= 1; i++) {
+    box(
+      "casino chair",
+      x + i * 2,
+      0.55,
+      z + 2.4,
+      1.05,
+      1.1,
+      0.8,
+      materials.red
+    );
+  }
+}    
     casinoTable(-10, -3, "roulette");
     casinoTable(0, 3, "blackjack");
     casinoTable(10, -3, "craps");
