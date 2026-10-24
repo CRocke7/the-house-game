@@ -274,7 +274,12 @@
     controls.addEventListener("unlock", () => {
   startScreen.style.display = "none";
 });
-
+  renderer.domElement.addEventListener("click", () => {
+  if (!controls.isLocked) {
+    controls.lock();
+  }
+});
+  
     const mat = (color, roughness = 0.8, metalness = 0) =>
       new THREE.MeshStandardMaterial({ color, roughness, metalness });
 
