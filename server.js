@@ -30,7 +30,6 @@ io.on("connection", (socket) => {
     ]
   };
   
-  socket.emit("currentPlayers", players);
   socket.emit("balanceUpdate", players[socket.id].balance); 
   socket.on("createRoom", () => {
   let roomCode;
