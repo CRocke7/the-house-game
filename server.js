@@ -26,6 +26,8 @@ io.on("connection", (socket) => {
   ]
 };
   socket.emit("currentPlayers", players);
+  socket.emit("balanceUpdate", players[socket.id].balance);  
+  
   socket.broadcast.emit("playerJoined", {
     id: socket.id,
     player: players[socket.id]
