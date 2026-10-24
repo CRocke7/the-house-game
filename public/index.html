@@ -917,7 +917,21 @@ socket.on("roomJoined", (roomCode) => {
 socket.on("roomError", (message) => {
   roomMessage.textContent = message;
 });
-  const balanceDisplay = document.querySelector("#balance");
+  socket.on("currentPlayers", (players) => {
+  for (const [id, player] of Object.entries(players)) {
+    if (id === socket.id) continue;
+    if (remotePlayers.has(id)) continue;
+
+    const avatar = makeAvatar(player.color);
+    avatar.position.set(player.x, 0, player.z);
+    avatar.rotation.y = player.rotation;
+
+    remotePlayers.set(id, avatar);
+  }
+
+  updatePlayerCount();
+});  
+const balanceDisplay = document.querySelector("#balance");
 const slotBetInput = document.querySelector("#slotBet");
 const spinButton = document.querySelector("#spinButton"); 
 const recoveryButton = document.querySelector("#recoveryButton");  
