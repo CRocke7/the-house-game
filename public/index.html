@@ -287,6 +287,8 @@
 
     const controls = new PointerLockControls(camera, document.body);
     const startScreen = document.querySelector("#start");
+    startScreen.style.display = "none";    
+    
     const message = document.querySelector("#message");
 
     document.querySelector("#play").addEventListener("click", () => {
@@ -899,6 +901,7 @@ socket.on("roomJoined", (roomCode) => {
   activeRoomCode.textContent = roomCode;
   roomStatus.style.display = "block";
   roomMenu.style.display = "none";
+  startScreen.style.display = "none";
   renderer.domElement.style.display = "block";
 });
 
@@ -907,7 +910,8 @@ socket.on("roomError", (message) => {
 });
   const balanceDisplay = document.querySelector("#balance");
 const slotBetInput = document.querySelector("#slotBet");
-const spinButton = document.querySelector("#spinButton");    
+const spinButton = document.querySelector("#spinButton"); 
+const recoveryButton = document.querySelector("#recoveryButton");  
   
   // Slot machine game logic
 const slotMessage = document.querySelector("#slotMessage");
@@ -918,7 +922,6 @@ let selectedSlotMachine = null;
 
 spinButton.addEventListener("click", () => {
   const bet = Number(slotBetInput.value);
-  const recoveryButton = document.querySelector("#recoveryButton");
   
   if (!Number.isInteger(bet) || bet < 100) {
     slotMessage.style.display = "block";
