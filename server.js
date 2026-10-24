@@ -14,6 +14,7 @@ app.get("/", (req, res) => {
 });
 
 const players = {};
+const recoveryCooldowns = {};
 
 io.on("connection", (socket) => {
   players[socket.id] = {
@@ -98,6 +99,31 @@ io.on("connection", (socket) => {
 
   socket.emit("balanceUpdate", player.balance);
   socket.emit("slotSpinResult", { results, payout, bet });
+});  
+  socket.on("claimRecovery", () => {
+  const player = players[socket.id];
+  if (!player) return;
+
+  const now = Date.now();
+  const cooldown = 24 * 60 * 60 * 1000;
+  const lastRecovery = recoveryCooldowns[socket.id] || 0;
+
+  if (player.balance > 0) {
+    socket.emit("recoveryMessage", "You can only claim recovery money when your balance is $0.");
+    return;
+  }
+
+  if (now - lastRecovery < cooldown) {
+    const hoursLeft = Math.ceil((cooldown - (now - lastRecovery)) / (60 * 60 * 1000));
+    socket.emit("recoveryMessage", `Your next recovery allowance is available in about ${hoursLeft} hour(s).`);
+    return;
+  }
+
+  player.balance = 500;
+  recoveryCooldowns[socket.id] = now;
+
+  socket.emit("balanceUpdate", player.balance);
+  socket.emit("recoveryMessage", "Recovery allowance claimed! You received $500.");
 });  
   socket.on("disconnect", () => {
     delete players[socket.id];
