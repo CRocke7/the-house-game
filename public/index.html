@@ -1008,7 +1008,14 @@ if (results.every(s => s.name === results[0].name)) {
     // A few simple stylized multiplayer avatars
     
     
-    socket.on("balanceUpdate", (balance) => {
+    let pendingBalance = null;
+
+socket.on("balanceUpdate", (balance) => {
+  if (spinButton.disabled) {
+    pendingBalance = balance;
+    return;
+  }
+
   balanceDisplay.textContent = `Balance: $${balance.toLocaleString()}`;
   recoveryButton.style.display = balance <= 0 ? "block" : "none";
 });
