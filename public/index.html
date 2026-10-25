@@ -905,7 +905,17 @@ return wheel;
   requestAnimationFrame(animate);
 }
 
+  function casinoTable(x, z, type) {
+  const isCraps = type === "craps";
+  const isRoulette = type === "roulette";
+  const topMat = isCraps
+    ? materials.green
+    : isRoulette
+      ? materials.green
+      : materials.dark;
+
   if (isCraps) {
+    
     // Craps table base and felt
     box("table pedestal", x, 0.45, z, 1.5, 0.9, 1.5, materials.dark);
     box("table rim", x, 0.95, z, 4.2, 0.25, 2.8, materials.gold);
