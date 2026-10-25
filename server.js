@@ -17,13 +17,16 @@ const players = {};
 const playerRooms = {};
 const rooms = new Set();
 const recoveryCooldowns = {};
+const chairOccupants = {};
 
 io.on("connection", (socket) => {
   players[socket.id] = {
-    x: 0,
-    z: 0,
-    rotation: 0,
-    balance: 1000,
+  x: 0,
+  z: 0,
+  rotation: 0,
+  isSitting: false,
+  chairId: null,
+  balance: 1000,
     lastRecoveryTime: 0,
     color: ["#36c5f0", "#ff647c", "#ffd166", "#8b80f9"][
       Math.floor(Math.random() * 4)
@@ -103,7 +106,71 @@ socket.on("joinRoom", (code) => {
       player: players[socket.id]
     });
   });
+  socket.on("sitDown", (chairId) => {
+    const player = players[socket.id];
+    const roomCode = playerRooms[socket.id];
 
+    if (!player || !roomCode) return;
+
+    if (
+      !Number.isInteger(chairId) ||
+      chairId < 0 ||
+      chairId >= 9
+    ) {
+      socket.emit("sitError", "That chair is invalid.");
+      return;
+    }
+
+    const chairKey = `${roomCode}:${chairId}`;
+    const occupant = chairOccupants[chairKey];
+
+    if (occupant && occupant !== socket.id) {
+      socket.emit("sitError", "That chair is already occupied.");
+      return;
+    }
+
+    // Release the player's previous chair, if necessary.
+    if (player.chairId !== null) {
+      const oldKey = `${roomCode}:${player.chairId}`;
+
+      if (chairOccupants[oldKey] === socket.id) {
+        delete chairOccupants[oldKey];
+      }
+    }
+
+    chairOccupants[chairKey] = socket.id;
+    player.isSitting = true;
+    player.chairId = chairId;
+
+    io.to(roomCode).emit("playerMoved", {
+      id: socket.id,
+      player
+    });
+  });
+
+  socket.on("standUp", () => {
+    const player = players[socket.id];
+    const roomCode = playerRooms[socket.id];
+
+    if (!player || !roomCode || !player.isSitting) return;
+
+    if (player.chairId !== null) {
+      const chairKey = `${roomCode}:${player.chairId}`;
+
+      if (chairOccupants[chairKey] === socket.id) {
+        delete chairOccupants[chairKey];
+      }
+    }
+
+    player.isSitting = false;
+    player.chairId = null;
+
+    io.to(roomCode).emit("playerMoved", {
+      id: socket.id,
+      player
+    });
+  });
+ 
   socket.on("slotSpin", (bet) => {
   const player = players[socket.id];
 
@@ -244,7 +311,17 @@ socket.on("joinRoom", (code) => {
 });  
   socket.on("disconnect", () => {
   const roomCode = playerRooms[socket.id];
-
+   if (roomCode) {
+    for (const [chairKey, occupantId] of Object.entries(chairOccupants)) {
+      if (
+        chairKey.startsWith(`${roomCode}:`) &&
+        occupantId === socket.id
+      ) {
+        delete chairOccupants[chairKey];
+      }
+    }
+  }
+    
   delete players[socket.id];
   delete playerRooms[socket.id];
 
