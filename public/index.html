@@ -650,6 +650,9 @@
       })
     );
 
+    pocket.position.y = 0.012;
+    pocket.renderOrder = 2;
+    pocket.material.depthTest = true;
     wheel.add(pocket);
 
     // Gold separator, raised slightly above the pocket surface
