@@ -141,7 +141,8 @@ socket.on("joinRoom", (code) => {
     chairOccupants[chairKey] = socket.id;
     player.isSitting = true;
     player.chairId = chairId;
-
+    socket.emit("sitAccepted", chairId);
+    
     io.to(roomCode).emit("playerMoved", {
       id: socket.id,
       player
