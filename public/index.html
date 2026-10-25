@@ -1580,7 +1580,8 @@ socket.on("slotSpinError", (error) => {
 
    function makeAvatar(color) {
   const group = new THREE.Group();
-
+  group.scale.y = 1.12;
+     
   const shirtMaterial = mat(color);
   const skinMaterial = mat("#edc7a4");
   const pantsMaterial = mat("#26344a");
