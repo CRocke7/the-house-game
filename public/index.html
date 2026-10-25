@@ -1544,9 +1544,7 @@ if (overlapsObject()) {
     socket.on("connect_error", () => {
       message.textContent = "Server not connected yet. We'll connect it on Render.";
     });
-  </script>
-  <script>
-(() => {
+  (() => {
   const panel = document.querySelector("#roulettePanel");
   const betInput = document.querySelector("#rouletteBetAmount");
   const numberInput = document.querySelector("#rouletteNumber");
@@ -1554,8 +1552,14 @@ if (overlapsObject()) {
   const spinButton = document.querySelector("#rouletteSpinButton");
   const closeButton = document.querySelector("#rouletteCloseButton");
 
-  if (!panel || !betInput || !numberInput || !message ||
-      !spinButton || !closeButton) {
+  if (
+    !panel ||
+    !betInput ||
+    !numberInput ||
+    !message ||
+    !spinButton ||
+    !closeButton
+  ) {
     console.error("Roulette panel elements are missing.");
     return;
   }
@@ -1575,10 +1579,12 @@ if (overlapsObject()) {
     }
   });
 
+  // Close the roulette panel.
   closeButton.addEventListener("click", () => {
     panel.style.display = "none";
   });
 
+  // Select a bet.
   panel.querySelectorAll("[data-roulette-bet]").forEach((button) => {
     button.addEventListener("click", () => {
       if (waitingForResult) return;
@@ -1587,7 +1593,8 @@ if (overlapsObject()) {
       const type = button.dataset.rouletteBet;
 
       if (!Number.isInteger(amount) || amount < 10) {
-        message.textContent = "Enter a whole-number bet of at least $10.";
+        message.textContent =
+          "Enter a whole-number bet of at least $10.";
         return;
       }
 
@@ -1606,6 +1613,7 @@ if (overlapsObject()) {
     });
   });
 
+  // Spin the roulette wheel.
   spinButton.addEventListener("click", () => {
     if (waitingForResult) return;
 
@@ -1621,11 +1629,13 @@ if (overlapsObject()) {
     socket.emit("rouletteSpin", selectedBet);
   });
 
+  // Display the result from the server.
   socket.on("rouletteSpinResult", (data) => {
     waitingForResult = false;
     spinButton.disabled = false;
 
-    const resultText = `${data.result} (${data.color.toUpperCase()})`;
+    const resultText =
+      `${data.result} (${data.color.toUpperCase()})`;
 
     if (data.won) {
       message.textContent =
@@ -1638,6 +1648,7 @@ if (overlapsObject()) {
     selectedBet = null;
   });
 
+  // Display errors from the server.
   socket.on("rouletteSpinError", (error) => {
     waitingForResult = false;
     spinButton.disabled = false;
@@ -1645,7 +1656,7 @@ if (overlapsObject()) {
   });
 
   console.log("Roulette controls connected.");
-})();
-</script>
+})();  
+  </script>
 </body>
 </html>
