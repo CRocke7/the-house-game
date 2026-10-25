@@ -1873,7 +1873,8 @@ if (overlapsObject()) {
         type,
         number: Number(numberInput.value)
       };
-
+      placeRouletteBetChip(selectedBet);
+      
       message.textContent =
         `Selected $${amount} on ${
           type === "number"
@@ -1927,6 +1928,7 @@ if (overlapsObject()) {
     }
 
     selectedBet = null;
+    clearRouletteBetChip();
   });
 
   // Display errors from the server.
