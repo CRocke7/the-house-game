@@ -608,40 +608,36 @@
       number === 0 ? "#168044" :
       reds.has(number) ? "#c52232" : "#17191d";
 
-    // Horizontal colored wedge for each pocket
-    const segments = 8;
-    const vertices = [];
-    const indices = [];
-
+    // Horizontal colored ring segment for each pocket
     const startAngle = angle - step * 0.47;
     const endAngle = angle + step * 0.47;
 
-    // Flat wedge, built directly in the X/Z plane
-    vertices.push(0, pocketY, 0);
+    const shape = new THREE.Shape();
 
-    for (let j = 0; j <= segments; j++) {
-      const a = startAngle + (endAngle - startAngle) * j / segments;
-      vertices.push(
-        Math.sin(a) * outerRadius,
-        pocketY,
-        Math.cos(a) * outerRadius
-      );
-    }
-
-    for (let j = 0; j < segments; j++) {
-      indices.push(0, j + 1, j + 2);
-    }
-
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(vertices, 3)
+    shape.moveTo(
+      Math.sin(startAngle) * innerRadius,
+      Math.cos(startAngle) * innerRadius
     );
-    geometry.setIndex(indices);
-    geometry.computeVertexNormals();
+
+    shape.lineTo(
+      Math.sin(startAngle) * outerRadius,
+      Math.cos(startAngle) * outerRadius
+    );
+
+    shape.lineTo(
+      Math.sin(endAngle) * outerRadius,
+      Math.cos(endAngle) * outerRadius
+    );
+
+    shape.lineTo(
+      Math.sin(endAngle) * innerRadius,
+      Math.cos(endAngle) * innerRadius
+    );
+
+    shape.closePath();
 
     const pocket = new THREE.Mesh(
-      geometry,
+      new THREE.ShapeGeometry(shape),
       new THREE.MeshBasicMaterial({
         color,
         side: THREE.DoubleSide,
@@ -649,7 +645,10 @@
       })
     );
 
+    pocket.rotation.x = -Math.PI / 2;
+    pocket.position.y = pocketY;
     pocket.renderOrder = 2;
+
     wheel.add(pocket);
 
     // Gold separator at each pocket boundary
@@ -695,13 +694,12 @@
     );
 
     label.rotation.x = -Math.PI / 2;
-label.position.y = pocketY + 0.025;
-label.renderOrder = 3;
     label.position.set(
       Math.sin(angle) * 0.48,
-      pocketY + 0.012,
+      pocketY + 0.025,
       Math.cos(angle) * 0.48
     );
+    label.renderOrder = 3;
     wheel.add(label);
   });
 
