@@ -176,7 +176,18 @@
   display: none;
   max-width: 90%;
 } 
-    #roomMenu,
+   #roomMenu {
+  position: fixed;
+  top: 100px;
+  left: 24px;
+  z-index: 10;
+  padding: 20px;
+  background: rgba(12, 16, 20, 0.94);
+  border: 1px solid #c9a44c;
+  border-radius: 10px;
+  pointer-events: auto;
+}
+
 #roomStatus {
   pointer-events: auto;
 }
@@ -365,8 +376,8 @@
     });
 
     controls.addEventListener("unlock", () => {
-  startScreen.style.display = "none";
-});
+      startScreen.style.display = "none";
+    });
   renderer.domElement.addEventListener("click", () => {
   if (!controls.isLocked) {
     controls.lock();
