@@ -618,8 +618,20 @@
     const vertices = [];
     const indices = [];
 
-    const a = j * 2;
-      indices.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+    // Build the colored pocket ring segments
+    for (let j = 0; j <= segments; j++) {
+      const a = startAngle + (endAngle - startAngle) * j / segments;
+
+      vertices.push(
+        Math.sin(a) * innerRadius, pocketY, Math.cos(a) * innerRadius,
+        Math.sin(a) * outerRadius, pocketY, Math.cos(a) * outerRadius
+      );
+    }
+
+    for (let j = 0; j < segments; j++) {
+      const a = j * 2;
+      indices.push(a, a + 1, a + 2);
+      indices.push(a + 1, a + 3, a + 2);
     }
 
     const geometry = new THREE.BufferGeometry();
