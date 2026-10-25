@@ -643,32 +643,35 @@
 
     const pocket = new THREE.Mesh(
       geometry,
-      new THREE.MeshStandardMaterial({
-        color,
-        roughness: 0.45,
-        metalness: 0.1,
-        side: THREE.DoubleSide
-      })
+     new THREE.MeshBasicMaterial({
+  color,
+  side: THREE.DoubleSide
+})
     );
 
     wheel.add(pocket);
 
-    // Gold separator at each pocket boundary
+    // Gold separator, raised slightly above the pocket surface
     const divider = new THREE.Mesh(
-      new THREE.BoxGeometry(0.008, 0.012, outerRadius - innerRadius),
-      materials.gold
+      new THREE.BoxGeometry(0.006, 0.008, outerRadius - innerRadius),
+      new THREE.MeshStandardMaterial({
+        color: "#d6b15e",
+        metalness: 0.65,
+        roughness: 0.3
+      })
     );
+
     const midAngle = angle + step / 2;
     const midRadius = (innerRadius + outerRadius) / 2;
 
     divider.position.set(
       Math.sin(midAngle) * midRadius,
-      pocketY + 0.006,
+      pocketY + 0.008,
       Math.cos(midAngle) * midRadius
     );
+
     divider.rotation.y = midAngle;
     wheel.add(divider);
-
     // Number texture, facing upward for visibility
     const canvas = document.createElement("canvas");
     canvas.width = 128;
