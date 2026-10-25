@@ -563,10 +563,12 @@
 
   // Outer gold rim
   const rim = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.76, 0.76, 0.14, 64),
-    materials.gold
-  );
-  wheel.add(rim);
+  new THREE.TorusGeometry(0.68, 0.06, 12, 64),
+  materials.gold
+);
+
+rim.rotation.x = Math.PI / 2;
+wheel.add(rim);
 
   // Dark wooden body
   const body = new THREE.Mesh(
@@ -598,7 +600,7 @@
 
     pocket.position.set(
       Math.sin(angle) * pocketRadius,
-      0.025,
+      0.009,
       Math.cos(angle) * pocketRadius
     );
     pocket.rotation.y = angle;
@@ -632,7 +634,7 @@
 
     label.position.set(
       Math.sin(angle) * (pocketRadius + 0.015),
-      0.052,
+      0.012,
       Math.cos(angle) * (pocketRadius + 0.015)
     );
     label.rotation.x = -Math.PI / 2;
