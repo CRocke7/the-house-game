@@ -225,7 +225,64 @@
       CLAIM $500 RECOVERY
     </button>
     <div id="crosshair"></div>
-    <div id="slotMessage"></div>    
+    <div id="slotMessage"></div>
+    <div id="roulettePanel" style="
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 340px;
+  max-width: 90vw;
+  padding: 22px;
+  background: #10251e;
+  color: #f5e7c0;
+  border: 2px solid #d7ae61;
+  border-radius: 14px;
+  z-index: 1000;
+  font-family: Georgia, serif;
+  text-align: center;
+">
+  <h2 style="margin-top: 0;">ROULETTE</h2>
+  <p>Place your bet</p>
+
+  <label for="rouletteBetAmount">Bet amount</label>
+  <input
+    id="rouletteBetAmount"
+    type="number"
+    min="10"
+    step="10"
+    value="10"
+    style="width: 90px; padding: 8px;"
+  >
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px;">
+    <button data-roulette-bet="red" style="padding: 10px; background: #b82130; color: white;">RED</button>
+    <button data-roulette-bet="black" style="padding: 10px; background: #17191d; color: white;">BLACK</button>
+    <button data-roulette-bet="odd" style="padding: 10px;">ODD</button>
+    <button data-roulette-bet="even" style="padding: 10px;">EVEN</button>
+  </div>
+
+  <label for="rouletteNumber" style="display: block; margin-top: 14px;">Or pick a number</label>
+  <select id="rouletteNumber" style="padding: 8px; margin-top: 6px;">
+    <option value="0">0</option>
+    <script>
+      for (let n = 1; n <= 36; n++) {
+        document.write(`<option value="${n}">${n}</option>`);
+      }
+    </script>
+  </select>
+  <button data-roulette-bet="number" style="padding: 9px;">BET ON NUMBER</button>
+
+  <p id="rouletteMessage">Choose a bet to get started.</p>
+
+  <button id="rouletteSpinButton" style="padding: 12px; background: #d7ae61; color: #10251e; font-weight: bold;">
+    SPIN ROULETTE
+  </button>
+  <button id="rouletteCloseButton" style="padding: 10px; margin-left: 6px;">
+    CLOSE
+  </button>
+</div>    
     <div id="help">
       <b>W A S D</b> Move &nbsp;·&nbsp;
       <b>SPACE</b> Jump &nbsp;·&nbsp;
