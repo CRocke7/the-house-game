@@ -1545,5 +1545,107 @@ if (overlapsObject()) {
       message.textContent = "Server not connected yet. We'll connect it on Render.";
     });
   </script>
+  <script>
+(() => {
+  const panel = document.querySelector("#roulettePanel");
+  const betInput = document.querySelector("#rouletteBetAmount");
+  const numberInput = document.querySelector("#rouletteNumber");
+  const message = document.querySelector("#rouletteMessage");
+  const spinButton = document.querySelector("#rouletteSpinButton");
+  const closeButton = document.querySelector("#rouletteCloseButton");
+
+  if (!panel || !betInput || !numberInput || !message ||
+      !spinButton || !closeButton) {
+    console.error("Roulette panel elements are missing.");
+    return;
+  }
+
+  let selectedBet = null;
+  let waitingForResult = false;
+
+  // Press R while playing to open the roulette panel.
+  document.addEventListener("keydown", (event) => {
+    if (
+      event.code === "KeyR" &&
+      !event.repeat &&
+      controls.isLocked
+    ) {
+      panel.style.display = "block";
+      message.textContent = "Choose your bet, then spin!";
+    }
+  });
+
+  closeButton.addEventListener("click", () => {
+    panel.style.display = "none";
+  });
+
+  panel.querySelectorAll("[data-roulette-bet]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (waitingForResult) return;
+
+      const amount = Number(betInput.value);
+      const type = button.dataset.rouletteBet;
+
+      if (!Number.isInteger(amount) || amount < 10) {
+        message.textContent = "Enter a whole-number bet of at least $10.";
+        return;
+      }
+
+      selectedBet = {
+        amount,
+        type,
+        number: Number(numberInput.value)
+      };
+
+      message.textContent =
+        `Selected $${amount} on ${
+          type === "number"
+            ? "number " + selectedBet.number
+            : type.toUpperCase()
+        }. Press SPIN ROULETTE to play.`;
+    });
+  });
+
+  spinButton.addEventListener("click", () => {
+    if (waitingForResult) return;
+
+    if (!selectedBet) {
+      message.textContent = "Choose a bet first.";
+      return;
+    }
+
+    waitingForResult = true;
+    spinButton.disabled = true;
+    message.textContent = "The wheel is spinning...";
+
+    socket.emit("rouletteSpin", selectedBet);
+  });
+
+  socket.on("rouletteSpinResult", (data) => {
+    waitingForResult = false;
+    spinButton.disabled = false;
+
+    const resultText = `${data.result} (${data.color.toUpperCase()})`;
+
+    if (data.won) {
+      message.textContent =
+        `🎉 ${resultText} — YOU WON $${data.payout.toLocaleString()}!`;
+    } else {
+      message.textContent =
+        `${resultText} — No win this time.`;
+    }
+
+    selectedBet = null;
+  });
+
+  socket.on("rouletteSpinError", (error) => {
+    waitingForResult = false;
+    spinButton.disabled = false;
+    message.textContent = error;
+  });
+
+  console.log("Roulette controls connected.");
+})();
+</script>
 </body>
 </html>
