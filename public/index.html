@@ -1367,6 +1367,7 @@ socket.on("roomError", (message) => {
   updatePlayerCount();
 });  
 const balanceDisplay = document.querySelector("#balance");
+let rouletteInProgress = false;
 const slotBetInput = document.querySelector("#slotBet");
 const spinButton = document.querySelector("#spinButton"); 
 const recoveryButton = document.querySelector("#recoveryButton");  
@@ -1546,13 +1547,16 @@ if (results.every(s => s.name === results[0].name)) {
     let pendingBalance = null;
 
 socket.on("balanceUpdate", (balance) => {
-  if (spinButton.disabled) {
+  if (spinButton.disabled || rouletteInProgress) {
     pendingBalance = balance;
     return;
   }
 
-  balanceDisplay.textContent = `Balance: $${balance.toLocaleString()}`;
-  recoveryButton.style.display = balance <= 0 ? "block" : "none";
+  balanceDisplay.textContent =
+    `Balance: $${balance.toLocaleString()}`;
+
+  recoveryButton.style.display =
+    balance <= 0 ? "block" : "none";
 });
   
   socket.on("slotSpinResult", ({ results, payout, bet }) => {
