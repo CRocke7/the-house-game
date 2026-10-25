@@ -586,22 +586,22 @@
   );
   wheel.add(bowl);
 
-  // Inner dark bed for the numbered pockets
+  // Solid dark center bed — blocks everything behind it
   const pocketBed = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.425, 0.425, 0.055, 64),
+    new THREE.CylinderGeometry(0.425, 0.425, 0.06, 64),
     new THREE.MeshStandardMaterial({
       color: "#20242a",
       roughness: 0.4,
       metalness: 0.15
     })
   );
-  pocketBed.position.y = -0.055;
+  pocketBed.position.y = -0.045;
   wheel.add(pocketBed);
 
   // Numbered red, black, and green pockets
-  const innerRadius = 0.425;
+  const innerRadius = 0.435;
   const outerRadius = 0.535;
-  const pocketY = -0.044;
+  const pocketY = -0.012;
   const pocketCount = numbers.length;
   const step = (Math.PI * 2) / pocketCount;
 
@@ -612,42 +612,45 @@
       number === 0 ? "#168044" :
       reds.has(number) ? "#c52232" : "#17191d";
 
-     // Horizontal colored ring segment for each pocket
     const startAngle = angle - step * 0.47;
     const endAngle = angle + step * 0.47;
+    const segments = 6;
+    const vertices = [];
+    const indices = [];
 
-    const shape = new THREE.Shape();
-    shape.moveTo(
-      Math.sin(startAngle) * innerRadius,
-      Math.cos(startAngle) * innerRadius
+    // Build a real flat ring segment, not a wedge to the center
+    for (let j = 0; j <= segments; j++) {
+      const a = startAngle + (endAngle - startAngle) * j / segments;
+
+      vertices.push(
+        Math.sin(a) * innerRadius, pocketY, Math.cos(a) * innerRadius,
+        Math.sin(a) * outerRadius, pocketY, Math.cos(a) * outerRadius
+      );
+    }
+
+    for (let j = 0; j < segments; j++) {
+      const a = j * 2;
+      indices.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(vertices, 3)
     );
-    shape.lineTo(
-      Math.sin(startAngle) * outerRadius,
-      Math.cos(startAngle) * outerRadius
-    );
-    shape.lineTo(
-      Math.sin(endAngle) * outerRadius,
-      Math.cos(endAngle) * outerRadius
-    );
-    shape.lineTo(
-      Math.sin(endAngle) * innerRadius,
-      Math.cos(endAngle) * innerRadius
-    );
-    shape.closePath();
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
 
     const pocket = new THREE.Mesh(
-      new THREE.ShapeGeometry(shape),
-      new THREE.MeshBasicMaterial({
-  color,
-  side: THREE.DoubleSide,
-  depthTest: false,
-  depthWrite: false
-})
+      geometry,
+      new THREE.MeshStandardMaterial({
+        color,
+        roughness: 0.45,
+        metalness: 0.1,
+        side: THREE.DoubleSide
+      })
     );
 
-    pocket.rotation.x = -Math.PI / 2;
-    pocket.position.y = pocketY;
-    pocket.renderOrder = 2;  
     wheel.add(pocket);
 
     // Gold separator at each pocket boundary
