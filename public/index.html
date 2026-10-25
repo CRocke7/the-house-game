@@ -628,13 +628,17 @@
     );
     shape.closePath();
 
-    const pocket = new THREE.Mesh(
+   const pocket = new THREE.Mesh(
   new THREE.ShapeGeometry(shape),
   new THREE.MeshBasicMaterial({
     color,
     side: THREE.DoubleSide
   })
 );
+
+pocket.rotation.x = -Math.PI / 2;
+pocket.position.y = pocketY;
+wheel.add(pocket);
 
 pocket.position.y = pocketY;
 wheel.add(pocket);
@@ -681,7 +685,7 @@ wheel.add(pocket);
       })
     );
 
-    label.rotation.x = 0;
+    label.rotation.x = -Math.PI / 2;
     label.position.set(
       Math.sin(angle) * 0.48,
       pocketY + 0.012,
