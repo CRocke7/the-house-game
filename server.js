@@ -18,6 +18,19 @@ const playerRooms = {};
 const rooms = new Set();
 const recoveryCooldowns = {};
 const chairOccupants = {};
+const chairPositions = [
+  { x: -12, z: -0.6 },
+  { x: -10, z: -0.6 },
+  { x: -8, z: -0.6 },
+
+  { x: -2, z: 5.4 },
+  { x: 0, z: 5.4 },
+  { x: 2, z: 5.4 },
+
+  { x: 8, z: -0.6 },
+  { x: 10, z: -0.6 },
+  { x: 12, z: -0.6 }
+];
 
 io.on("connection", (socket) => {
   players[socket.id] = {
@@ -139,9 +152,14 @@ socket.on("joinRoom", (code) => {
     }
 
     chairOccupants[chairKey] = socket.id;
-    player.isSitting = true;
-    player.chairId = chairId;
-    socket.emit("sitAccepted", chairId);
+
+player.isSitting = true;
+player.chairId = chairId;
+
+player.x = chairPositions[chairId].x;
+player.z = chairPositions[chairId].z;
+
+socket.emit("sitAccepted", chairId);
     
     io.to(roomCode).emit("playerMoved", {
       id: socket.id,
