@@ -208,14 +208,14 @@ socket.on("joinRoom", (code) => {
 
    socket.emit("balanceUpdate", player.balance);
     socket.emit("rouletteSpinResult", {
-      result,
-      color,
-      won,
-      payout,
-      net: payout - amount,
-      bet: amount,
-      type: betData.type
-    });
+  result,
+  color,
+  won,
+  payout,
+  net: payout - amount,
+  bet: amount,
+  type: betData.type
+});
   });   
   socket.on("claimRecovery", () => {
   const player = players[socket.id];
