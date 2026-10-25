@@ -144,6 +144,78 @@ socket.on("joinRoom", (code) => {
   socket.emit("balanceUpdate", player.balance);
   socket.emit("slotSpinResult", { results, payout, bet });
 });  
+  socket.on("rouletteSpin", (betData) => {
+    const player = players[socket.id];
+    if (!player) return;
+
+    if (
+      !betData ||
+      typeof betData.amount !== "number" ||
+      !Number.isInteger(betData.amount) ||
+      betData.amount < 10 ||
+      betData.amount > player.balance
+    ) {
+      socket.emit("rouletteSpinError", "Bet must be at least $10 and no more than your balance.");
+      return;
+    }
+
+    const validTypes = ["red", "black", "odd", "even", "number"];
+    if (!validTypes.includes(betData.type)) {
+      socket.emit("rouletteSpinError", "Choose a valid roulette bet.");
+      return;
+    }
+
+    if (
+      betData.type === "number" &&
+      (!Number.isInteger(betData.number) ||
+        betData.number < 0 ||
+        betData.number > 36)
+    ) {
+      socket.emit("rouletteSpinError", "Choose a number from 0 to 36.");
+      return;
+    }
+
+    const amount = betData.amount;
+    const redNumbers = new Set([
+      1, 3, 5, 7, 9, 12, 14, 16, 18,
+      19, 21, 23, 25, 27, 30, 32, 34, 36
+    ]);
+
+    player.balance -= amount;
+
+    const result = Math.floor(Math.random() * 37);
+    const color = result === 0
+      ? "green"
+      : redNumbers.has(result) ? "red" : "black";
+
+    let won = false;
+
+    if (betData.type === "number") {
+      won = result === betData.number;
+    } else if (betData.type === "red" || betData.type === "black") {
+      won = color === betData.type;
+    } else if (betData.type === "odd") {
+      won = result !== 0 && result % 2 === 1;
+    } else if (betData.type === "even") {
+      won = result !== 0 && result % 2 === 0;
+    }
+
+    const payout = won
+      ? amount * (betData.type === "number" ? 36 : 2)
+      : 0;
+
+    player.balance += payout;
+
+    socket.emit("balanceUpdate", player.balance);
+    socket.emit("rouletteSpinResult", {
+      result,
+      color,
+      won,
+      payout,
+      bet: amount,
+      type: betData.type
+    });
+  });  
   socket.on("claimRecovery", () => {
   const player = players[socket.id];
   if (!player) return;
