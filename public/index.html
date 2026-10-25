@@ -1714,8 +1714,8 @@ socket.on("playerJoined", ({ id, player }) => {
 
   isSitting = true;
   camera.position.x = chair.x;
-  camera.position.z = chair.z;
-  camera.position.y = seatedCameraHeight;
+ camera.position.z = chair.z + 0.8;
+ camera.position.y = seatedCameraHeight;
 
   verticalVelocity = 0;
   isGrounded = true;
