@@ -545,85 +545,134 @@
     }
   function createRouletteWheel(x, z) {
   const wheel = new THREE.Group();
-
   wheel.position.set(x - 0.85, 1.59, z);
 
-  // Standard European roulette wheel order
-  const wheelNumbers = [
+  const numbers = [
     0, 32, 15, 19, 4, 21, 2, 25, 17, 34,
     6, 27, 13, 36, 11, 30, 8, 23, 10, 5,
     24, 16, 33, 1, 20, 14, 31, 9, 22, 18,
     29, 7, 28, 12, 35, 3, 26
   ];
 
-  const redNumbers = new Set([
+  const reds = new Set([
     1, 3, 5, 7, 9, 12, 14, 16, 18,
     19, 21, 23, 25, 27, 30, 32, 34, 36
   ]);
 
-  // Outer gold rim
-  const rim = new THREE.Mesh(
-  new THREE.TorusGeometry(0.68, 0.06, 12, 64),
-  materials.gold
-);
+  const makeMat = (color, roughness = 0.5) =>
+    new THREE.MeshStandardMaterial({ color, roughness });
 
-rim.rotation.x = Math.PI / 2;
-wheel.add(rim);
-
-  // Dark wooden body
-  const body = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.67, 0.67, 0.14, 64),
+  // Dark wooden base
+  const base = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.69, 0.72, 0.13, 64),
     materials.dark
   );
-  body.position.y = -0.08;
-  wheel.add(body);
+  base.position.y = -0.065;
+  wheel.add(base);
 
-  // Numbered pockets
-  const pocketRadius = 0.49;
-  const pocketSize = 0.085;
+  // Smooth, shallow bowl sloping toward the pockets
+  const bowlProfile = [
+    new THREE.Vector2(0.73, 0.015),
+    new THREE.Vector2(0.69, 0.015),
+    new THREE.Vector2(0.65, -0.005),
+    new THREE.Vector2(0.61, -0.035),
+    new THREE.Vector2(0.57, -0.075),
+    new THREE.Vector2(0.54, -0.095)
+  ];
 
-  wheelNumbers.forEach((number, i) => {
-    const angle = (i / wheelNumbers.length) * Math.PI * 2;
+  const bowl = new THREE.Mesh(
+    new THREE.LatheGeometry(bowlProfile, 64),
+    makeMat("#b08a43", 0.32)
+  );
+  wheel.add(bowl);
+
+  // Inner dark bed for the numbered pockets
+  const pocketBed = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.545, 0.545, 0.045, 64),
+    makeMat("#20242a")
+  );
+  pocketBed.position.y = -0.075;
+  wheel.add(pocketBed);
+
+  // Numbered red, black, and green pockets
+  const innerRadius = 0.425;
+  const outerRadius = 0.535;
+  const pocketY = -0.044;
+  const pocketCount = numbers.length;
+  const step = (Math.PI * 2) / pocketCount;
+
+  numbers.forEach((number, i) => {
+    const angle = i * step;
 
     const color =
       number === 0 ? "#168044" :
-      redNumbers.has(number) ? "#b82130" : "#17191d";
+      reds.has(number) ? "#c52232" : "#17191d";
+
+    // A narrow wedge for each pocket
+    const shape = new THREE.Shape();
+    shape.moveTo(
+      Math.sin(angle - step * 0.47) * innerRadius,
+      Math.cos(angle - step * 0.47) * innerRadius
+    );
+    shape.lineTo(
+      Math.sin(angle - step * 0.47) * outerRadius,
+      Math.cos(angle - step * 0.47) * outerRadius
+    );
+    shape.lineTo(
+      Math.sin(angle + step * 0.47) * outerRadius,
+      Math.cos(angle + step * 0.47) * outerRadius
+    );
+    shape.lineTo(
+      Math.sin(angle + step * 0.47) * innerRadius,
+      Math.cos(angle + step * 0.47) * innerRadius
+    );
+    shape.closePath();
 
     const pocket = new THREE.Mesh(
-      new THREE.BoxGeometry(pocketSize, 0.035, 0.15),
-      new THREE.MeshStandardMaterial({
+      new THREE.ShapeGeometry(shape),
+      new THREE.MeshBasicMaterial({
         color,
-        roughness: 0.55,
-        metalness: 0.12
+        side: THREE.DoubleSide
       })
     );
-
-    pocket.position.set(
-      Math.sin(angle) * pocketRadius,
-      0.009,
-      Math.cos(angle) * pocketRadius
-    );
-    pocket.rotation.y = angle;
+    pocket.rotation.x = -Math.PI / 2;
+    pocket.position.y = pocketY;
     wheel.add(pocket);
 
-    // Draw the actual number onto a small canvas texture
-    const labelCanvas = document.createElement("canvas");
-    labelCanvas.width = 128;
-    labelCanvas.height = 128;
+    // Gold separator at each pocket boundary
+    const divider = new THREE.Mesh(
+      new THREE.BoxGeometry(0.008, 0.012, outerRadius - innerRadius),
+      materials.gold
+    );
+    const midAngle = angle + step / 2;
+    const midRadius = (innerRadius + outerRadius) / 2;
 
-    const ctx = labelCanvas.getContext("2d");
+    divider.position.set(
+      Math.sin(midAngle) * midRadius,
+      pocketY + 0.006,
+      Math.cos(midAngle) * midRadius
+    );
+    divider.rotation.y = midAngle;
+    wheel.add(divider);
+
+    // Number texture, facing upward for visibility
+    const canvas = document.createElement("canvas");
+    canvas.width = 128;
+    canvas.height = 128;
+
+    const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, 128, 128);
-    ctx.fillStyle = "#fff4d0";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "bold 76px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(String(number), 64, 66);
 
-    const texture = new THREE.CanvasTexture(labelCanvas);
+    const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
 
     const label = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.105, 0.105),
+      new THREE.PlaneGeometry(0.075, 0.075),
       new THREE.MeshBasicMaterial({
         map: texture,
         transparent: true,
@@ -632,48 +681,41 @@ wheel.add(rim);
       })
     );
 
-    label.position.set(
-      Math.sin(angle) * (pocketRadius + 0.015),
-      0.012,
-      Math.cos(angle) * (pocketRadius + 0.015)
-    );
     label.rotation.x = -Math.PI / 2;
-    label.rotation.z = -angle;
-
+    label.position.set(
+      Math.sin(angle) * 0.48,
+      pocketY + 0.012,
+      Math.cos(angle) * 0.48
+    );
     wheel.add(label);
   });
 
-  // Gold center spindle
+  // Smaller central spindle
   const spindle = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.14, 0.22, 0.18, 32),
+    new THREE.CylinderGeometry(0.105, 0.15, 0.12, 32),
     materials.gold
   );
-  spindle.position.y = 0.06;
+  spindle.position.y = -0.005;
   wheel.add(spindle);
 
   const center = new THREE.Mesh(
-    new THREE.SphereGeometry(0.13, 24, 20),
+    new THREE.SphereGeometry(0.095, 24, 20),
     materials.gold
   );
-  center.position.y = 0.16;
+  center.position.y = 0.075;
   wheel.add(center);
 
-  // White roulette ball, initially resting near the outer track
+  // White ball on the outer track
   const ball = new THREE.Mesh(
     new THREE.SphereGeometry(0.035, 20, 16),
-    new THREE.MeshStandardMaterial({
-      color: "#ffffff",
-      roughness: 0.2,
-      metalness: 0.05
-    })
+    makeMat("#ffffff", 0.22)
   );
 
-  ball.position.set(0, 0.105, 0.60);
+  ball.position.set(0, 0.055, 0.615);
   wheel.add(ball);
 
-  // Keep a reference for future spinning animation
   wheel.userData.ball = ball;
-  wheel.userData.numbers = wheelNumbers;
+  wheel.userData.numbers = numbers;
 
   scene.add(wheel);
   return wheel;
