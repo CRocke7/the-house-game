@@ -629,15 +629,15 @@
     shape.closePath();
 
     const pocket = new THREE.Mesh(
-      new THREE.ShapeGeometry(shape),
-      new THREE.MeshBasicMaterial({
-        color,
-        side: THREE.DoubleSide
-      })
-    );
-    pocket.rotation.x = -Math.PI / 2;
-    pocket.position.y = pocketY;
-    wheel.add(pocket);
+  new THREE.ShapeGeometry(shape),
+  new THREE.MeshBasicMaterial({
+    color,
+    side: THREE.DoubleSide
+  })
+);
+
+pocket.position.y = pocketY;
+wheel.add(pocket);
 
     // Gold separator at each pocket boundary
     const divider = new THREE.Mesh(
@@ -681,7 +681,7 @@
       })
     );
 
-    label.rotation.x = -Math.PI / 2;
+    label.rotation.x = 0;
     label.position.set(
       Math.sin(angle) * 0.48,
       pocketY + 0.012,
@@ -711,7 +711,7 @@
     makeMat("#ffffff", 0.22)
   );
 
-  ball.position.set(0, 0.055, 0.615);
+  ball.position.set(0, 0.035, 0.615);
   wheel.add(ball);
 
   wheel.userData.ball = ball;
