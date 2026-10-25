@@ -638,13 +638,16 @@
     const pocket = new THREE.Mesh(
       new THREE.ShapeGeometry(shape),
       new THREE.MeshBasicMaterial({
-        color,
-        side: THREE.DoubleSide
-      })
+  color,
+  side: THREE.DoubleSide,
+  depthTest: false,
+  depthWrite: false
+})
     );
 
     pocket.rotation.x = -Math.PI / 2;
     pocket.position.y = pocketY;
+    pocket.renderOrder = 2;  
     wheel.add(pocket);
 
     // Gold separator at each pocket boundary
