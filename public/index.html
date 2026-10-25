@@ -1810,15 +1810,17 @@ if (nearestChair) {
 
       if (activeSpin) activeSpin.update(delta);
       
-      // Apply gravity and vertical movement
-      verticalVelocity -= gravity * delta;
-      camera.position.y += verticalVelocity * delta;
+ // Apply gravity only while standing.
+      if (!isSitting) {
+        verticalVelocity -= gravity * delta;
+        camera.position.y += verticalVelocity * delta;
 
-      // Keep the player at standing height when grounded
-      if (camera.position.y <= groundY) {
-        camera.position.y = groundY;
-        verticalVelocity = 0;
-        isGrounded = true;
+        // Keep the player at standing height when grounded.
+        if (camera.position.y <= groundY) {
+          camera.position.y = groundY;
+          verticalVelocity = 0;
+          isGrounded = true;
+        }
       }
       
       if (controls.isLocked && !isSitting) {
