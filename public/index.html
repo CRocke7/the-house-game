@@ -600,6 +600,7 @@
       texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
       return texture;
     }
+  let rouletteWheel = null;  
   function createRouletteWheel(x, z) {
   const wheel = new THREE.Group();
   wheel.position.set(x - 0.85, 1.59, z);
@@ -797,9 +798,70 @@
   wheel.userData.numbers = numbers;
 
   scene.add(wheel);
-  return wheel;
+rouletteWheel = wheel;
+return wheel;
 }
-    function casinoTable(x, z, type) {
+  function spinRouletteWheel(result, duration = 4500) {
+  if (!rouletteWheel) {
+    console.error("Roulette wheel hasn't been created.");
+    return;
+  }
+
+  const wheel = rouletteWheel;
+  const numbers = wheel.userData.numbers;
+  const resultIndex = numbers.indexOf(Number(result));
+
+  if (resultIndex === -1) {
+    console.error("Invalid roulette result:", result);
+    return;
+  }
+
+  const startRotation = wheel.rotation.y;
+  const step = (Math.PI * 2) / numbers.length;
+
+  // Make several full rotations, then align the winning pocket.
+  const targetRotation =
+    startRotation +
+    Math.PI * 2 * 7 -
+    resultIndex * step;
+
+  const startTime = performance.now();
+
+  function animate(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+
+    // Smooth ease-out: fast at first, gradually slowing down.
+    const eased = 1 - Math.pow(1 - progress, 4);
+
+    wheel.rotation.y =
+      startRotation + (targetRotation - startRotation) * eased;
+
+    // Keep the ball moving around the outer track.
+    const ball = wheel.userData.ball;
+    const angle = progress * Math.PI * 2 * 9;
+
+    ball.position.set(
+      Math.sin(angle) * 0.615,
+      0.035 + Math.sin(progress * Math.PI) * 0.025,
+      Math.cos(angle) * 0.615
+    );
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      // Park the ball at the winning pocket.
+      const finalAngle = -resultIndex * step;
+      ball.position.set(
+        Math.sin(finalAngle) * 0.48,
+        0.035,
+        Math.cos(finalAngle) * 0.48
+      );
+    }
+  }
+
+  requestAnimationFrame(animate);
+}    
+  function casinoTable(x, z, type) {
   const isCraps = type === "craps";
   const isRoulette = type === "roulette";
   const feltColor = type === "blackjack" ? "#174f70" : "#176447";
@@ -1625,12 +1687,15 @@ if (overlapsObject()) {
     waitingForResult = true;
     spinButton.disabled = true;
     message.textContent = "The wheel is spinning...";
-
+    panel.style.display = "none";
+    
     socket.emit("rouletteSpin", selectedBet);
   });
 
   // Display the result from the server.
   socket.on("rouletteSpinResult", (data) => {
+    panel.style.display = "none";
+spinRouletteWheel(data.result);    
     waitingForResult = false;
     spinButton.disabled = false;
 
