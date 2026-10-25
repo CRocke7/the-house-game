@@ -608,40 +608,49 @@
       number === 0 ? "#168044" :
       reds.has(number) ? "#c52232" : "#17191d";
 
-    // A narrow wedge for each pocket
-    const shape = new THREE.Shape();
-    shape.moveTo(
-      Math.sin(angle - step * 0.47) * innerRadius,
-      Math.cos(angle - step * 0.47) * innerRadius
-    );
-    shape.lineTo(
-      Math.sin(angle - step * 0.47) * outerRadius,
-      Math.cos(angle - step * 0.47) * outerRadius
-    );
-    shape.lineTo(
-      Math.sin(angle + step * 0.47) * outerRadius,
-      Math.cos(angle + step * 0.47) * outerRadius
-    );
-    shape.lineTo(
-      Math.sin(angle + step * 0.47) * innerRadius,
-      Math.cos(angle + step * 0.47) * innerRadius
-    );
-    shape.closePath();
+    // Horizontal colored wedge for each pocket
+    const segments = 8;
+    const vertices = [];
+    const indices = [];
 
-   const pocket = new THREE.Mesh(
-  new THREE.ShapeGeometry(shape),
-  new THREE.MeshBasicMaterial({
-    color,
-    side: THREE.DoubleSide
-  })
-);
+    const startAngle = angle - step * 0.47;
+    const endAngle = angle + step * 0.47;
 
-pocket.rotation.x = -Math.PI / 2;
-pocket.position.y = pocketY;
-wheel.add(pocket);
+    // Flat wedge, built directly in the X/Z plane
+    vertices.push(0, pocketY, 0);
 
-pocket.position.y = pocketY;
-wheel.add(pocket);
+    for (let j = 0; j <= segments; j++) {
+      const a = startAngle + (endAngle - startAngle) * j / segments;
+      vertices.push(
+        Math.sin(a) * outerRadius,
+        pocketY,
+        Math.cos(a) * outerRadius
+      );
+    }
+
+    for (let j = 0; j < segments; j++) {
+      indices.push(0, j + 1, j + 2);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(vertices, 3)
+    );
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+
+    const pocket = new THREE.Mesh(
+      geometry,
+      new THREE.MeshBasicMaterial({
+        color,
+        side: THREE.DoubleSide,
+        depthTest: false
+      })
+    );
+
+    pocket.renderOrder = 2;
+    wheel.add(pocket);
 
     // Gold separator at each pocket boundary
     const divider = new THREE.Mesh(
@@ -686,6 +695,8 @@ wheel.add(pocket);
     );
 
     label.rotation.x = -Math.PI / 2;
+label.position.y = pocketY + 0.025;
+label.renderOrder = 3;
     label.position.set(
       Math.sin(angle) * 0.48,
       pocketY + 0.012,
