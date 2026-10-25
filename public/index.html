@@ -1712,19 +1712,27 @@ if (overlapsObject()) {
   // Display the result from the server.
   socket.on("rouletteSpinResult", (data) => {
     panel.style.display = "none";
-spinRouletteWheel(data.result);    
+    spinRouletteWheel(data.result);
+
     waitingForResult = false;
     spinButton.disabled = false;
 
     const resultText =
       `${data.result} (${data.color.toUpperCase()})`;
 
-    if (data.won) {
+    const net = typeof data.net === "number"
+      ? data.net
+      : data.payout - data.bet;
+
+    if (net > 0) {
       message.textContent =
-        `🎉 ${resultText} — YOU WON $${data.payout.toLocaleString()}!`;
+        `🎉 ${resultText} — YOU WON $${net.toLocaleString()} NET!`;
+    } else if (net < 0) {
+      message.textContent =
+        `${resultText} — YOU LOST $${Math.abs(net).toLocaleString()}.`;
     } else {
       message.textContent =
-        `${resultText} — No win this time.`;
+        `${resultText} — BREAK EVEN!`;
     }
 
     selectedBet = null;
