@@ -817,72 +817,93 @@ return wheel;
   }
 
   const wheel = rouletteWheel;
+  const ball = wheel.userData.ball;
   const numbers = wheel.userData.numbers;
   const resultIndex = numbers.indexOf(Number(result));
 
-  if (resultIndex === -1) {
-    console.error("Invalid roulette result:", result);
+  if (resultIndex === -1 || !ball) {
+    console.error("Invalid roulette result or missing ball:", result);
     return;
   }
 
+  const fullTurn = Math.PI * 2;
+  const step = fullTurn / numbers.length;
+
   const startRotation = wheel.rotation.y;
-  const step = (Math.PI * 2) / numbers.length;
-
-  // Make several full rotations, then align the winning pocket.
-  const targetRotation =
-    startRotation +
-    Math.PI * 2 * 7 -
-    resultIndex * step;
-
   const startTime = performance.now();
 
-  function animate(now) {
-    const progress = Math.min((now - startTime) / duration, 1);
+  // Align the selected pocket with the wheel's stopping point.
+  const targetRotation =
+    (Math.floor(startRotation / fullTurn) + 8) * fullTurn
+    - resultIndex * step;
 
-    // Smooth ease-out: fast at first, gradually slowing down.
+  // Start from the ball's actual current position.
+  const startAngle = Math.atan2(
+    ball.position.x,
+    ball.position.z
+  );
+
+  // The ball gradually travels to the winning pocket.
+  let angleDifference =
+    resultIndex * step - startAngle;
+
+  angleDifference =
+    ((angleDifference % fullTurn) + fullTurn) % fullTurn;
+
+  const targetBallAngle =
+    startAngle + fullTurn * 9 + angleDifference;
+
+  const startRadius = Math.max(
+    0.48,
+    Math.hypot(ball.position.x, ball.position.z)
+  );
+
+  function animate(now) {
+    const progress = Math.min(
+      (now - startTime) / duration,
+      1
+    );
+
+    // Smooth deceleration.
     const eased = 1 - Math.pow(1 - progress, 4);
 
     wheel.rotation.y =
-      startRotation + (targetRotation - startRotation) * eased;
+      startRotation +
+      (targetRotation - startRotation) * eased;
 
-    // Keep the ball moving around the outer track.
-    const ball = wheel.userData.ball;
-    // The ball completes several laps, then gradually slows down.
-const ballProgress = 1 - Math.pow(1 - progress, 3);
-const angle = ballProgress * Math.PI * 2 * 9;
+    const angle =
+      startAngle +
+      (targetBallAngle - startAngle) * eased;
 
-const ballRadius = 0.615 - progress * 0.12;
-const ballHeight =
-  0.035 + Math.sin(progress * Math.PI) * 0.025;
+    const ballProgress = eased;
+    const radius =
+      startRadius + (0.48 - startRadius) * ballProgress;
 
-ball.position.set(
-  Math.sin(angle) * ballRadius,
-  ballHeight,
-  Math.cos(angle) * ballRadius
-);
+    const height =
+      0.035 + Math.sin(progress * Math.PI) * 0.025;
+
+    ball.position.set(
+      Math.sin(angle) * radius,
+      height,
+      Math.cos(angle) * radius
+    );
 
     if (progress < 1) {
       requestAnimationFrame(animate);
-   } else {
-  // Gently settle the ball into the winning pocket.
-  const finalAngle = -resultIndex * step;
-  const settleRadius = 0.48;
+    } else {
+      // Finish precisely at the winning pocket.
+      const finalAngle = resultIndex * step;
 
-  ball.position.set(
-    Math.sin(finalAngle) * settleRadius,
-    0.035,
-    Math.cos(finalAngle) * settleRadius
-  );
-}
+      ball.position.set(
+        Math.sin(finalAngle) * 0.48,
+        0.035,
+        Math.cos(finalAngle) * 0.48
+      );
+    }
   }
 
   requestAnimationFrame(animate);
-}    
-  function casinoTable(x, z, type) {
-  const isCraps = type === "craps";
-  const isRoulette = type === "roulette";
-  const feltColor = type === "blackjack" ? "#174f70" : "#176447";
-  const topMat = mat(feltColor, 0.9);
+}
 
   if (isCraps) {
     // Craps table base and felt
