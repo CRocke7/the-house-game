@@ -588,10 +588,14 @@
 
   // Inner dark bed for the numbered pockets
   const pocketBed = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.545, 0.545, 0.045, 64),
-    makeMat("#20242a")
+    new THREE.CylinderGeometry(0.425, 0.425, 0.055, 64),
+    new THREE.MeshStandardMaterial({
+      color: "#20242a",
+      roughness: 0.4,
+      metalness: 0.15
+    })
   );
-  pocketBed.position.y = -0.075;
+  pocketBed.position.y = -0.055;
   wheel.add(pocketBed);
 
   // Numbered red, black, and green pockets
@@ -608,47 +612,39 @@
       number === 0 ? "#168044" :
       reds.has(number) ? "#c52232" : "#17191d";
 
-    // Horizontal colored ring segment for each pocket
+     // Horizontal colored ring segment for each pocket
     const startAngle = angle - step * 0.47;
     const endAngle = angle + step * 0.47;
 
     const shape = new THREE.Shape();
-
     shape.moveTo(
       Math.sin(startAngle) * innerRadius,
       Math.cos(startAngle) * innerRadius
     );
-
     shape.lineTo(
       Math.sin(startAngle) * outerRadius,
       Math.cos(startAngle) * outerRadius
     );
-
     shape.lineTo(
       Math.sin(endAngle) * outerRadius,
       Math.cos(endAngle) * outerRadius
     );
-
     shape.lineTo(
       Math.sin(endAngle) * innerRadius,
       Math.cos(endAngle) * innerRadius
     );
-
     shape.closePath();
 
     const pocket = new THREE.Mesh(
       new THREE.ShapeGeometry(shape),
       new THREE.MeshBasicMaterial({
         color,
-        side: THREE.DoubleSide,
-        depthTest: false
+        side: THREE.DoubleSide
       })
     );
 
     pocket.rotation.x = -Math.PI / 2;
     pocket.position.y = pocketY;
-    pocket.renderOrder = 2;
-
     wheel.add(pocket);
 
     // Gold separator at each pocket boundary
@@ -696,7 +692,7 @@
     label.rotation.x = -Math.PI / 2;
     label.position.set(
       Math.sin(angle) * 0.48,
-      pocketY + 0.025,
+      pocketY + 0.035,
       Math.cos(angle) * 0.48
     );
     label.renderOrder = 3;
