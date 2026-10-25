@@ -1695,7 +1695,26 @@ socket.on("playerJoined", ({ id, player }) => {
   avatar.position.set(player.x, 0, player.z);
   avatar.rotation.y = player.rotation;
 });
-  // Jump settings
+  socket.on("sitAccepted", (chairId) => {
+  const chair = usableChairs[chairId];
+
+  if (!chair || isSitting) return;
+
+  seatedChair = chair;
+  seatedChair.occupiedBy = socket.id;
+
+  isSitting = true;
+  camera.position.x = chair.x;
+  camera.position.z = chair.z;
+  camera.position.y = seatedCameraHeight;
+
+  verticalVelocity = 0;
+  isGrounded = true;
+});
+
+socket.on("sitError", (message) => {
+  console.log(message);
+});  // Jump settings
 let verticalVelocity = 5;
 const jumpStrength = 7;
 const gravity = 20;
@@ -1756,39 +1775,14 @@ const nearestChair = usableChairs
   .sort((a, b) => a.distance - b.distance)[0];
 
 if (nearestChair) {
-  seatedChair = nearestChair.chair;
-  seatedChair.occupiedBy = socket.id;
+  const chairId = usableChairs.indexOf(nearestChair.chair);
 
-  isSitting = true;
-  camera.position.x = seatedChair.x;
-  camera.position.z = seatedChair.z;
-  camera.position.y = seatedCameraHeight;
+  if (chairId !== -1) {
+    socket.emit("sitDown", chairId);
+  }
 
-  verticalVelocity = 0;
-  isGrounded = true;
   return;
 }
-  let nearest = null;
-  let nearestDistance = Infinity;
-
-  for (const machine of slotMachines) {
-    const distance = Math.hypot(
-      camera.position.x - machine.x,
-      camera.position.z - (machine.z + 1.2)
-    );
-
-    if (distance < nearestDistance) {
-      nearestDistance = distance;
-      nearest = machine;
-    }
-  }
-
-  if (nearest && nearestDistance < 3.2) {
-    selectedSlotMachine = nearest;
-    slotMessage.style.display = "block";
-    slotMessage.textContent = "Machine selected! Choose your bet and press SPIN.";
-  }
-});
 
   document.addEventListener("keyup", (event) => {
   keys[event.code] = false;
