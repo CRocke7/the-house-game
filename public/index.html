@@ -838,25 +838,33 @@ return wheel;
 
     // Keep the ball moving around the outer track.
     const ball = wheel.userData.ball;
-    const angle = progress * Math.PI * 2 * 9;
+    / The ball completes several laps, then gradually slows down.
+const ballProgress = 1 - Math.pow(1 - progress, 3);
+const angle = ballProgress * Math.PI * 2 * 9;
 
-    ball.position.set(
-      Math.sin(angle) * 0.615,
-      0.035 + Math.sin(progress * Math.PI) * 0.025,
-      Math.cos(angle) * 0.615
-    );
+const ballRadius = 0.615 - progress * 0.12;
+const ballHeight =
+  0.035 + Math.sin(progress * Math.PI) * 0.025;
+
+ball.position.set(
+  Math.sin(angle) * ballRadius,
+  ballHeight,
+  Math.cos(angle) * ballRadius
+);
 
     if (progress < 1) {
       requestAnimationFrame(animate);
-    } else {
-      // Park the ball at the winning pocket.
-      const finalAngle = -resultIndex * step;
-      ball.position.set(
-        Math.sin(finalAngle) * 0.48,
-        0.035,
-        Math.cos(finalAngle) * 0.48
-      );
-    }
+   } else {
+  // Gently settle the ball into the winning pocket.
+  const finalAngle = -resultIndex * step;
+  const settleRadius = 0.48;
+
+  ball.position.set(
+    Math.sin(finalAngle) * settleRadius,
+    0.035,
+    Math.cos(finalAngle) * settleRadius
+  );
+}
   }
 
   requestAnimationFrame(animate);
