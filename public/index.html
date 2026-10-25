@@ -1198,10 +1198,28 @@ return wheel;
       materials.red
     );
   }
-}    
+} 
+  // Track the position of every usable casino chair.
+const usableChairs = [];
+
+function registerCasinoChairs(x, z) {
+  for (let i = -1; i <= 1; i++) {
+    usableChairs.push({
+      x: x + i * 2,
+      z: z + 2.4,
+      occupiedBy: null
+    });
+  }
+}   
+  
     casinoTable(-10, -3, "roulette");
-    casinoTable(0, 3, "blackjack");
-    casinoTable(10, -3, "craps");
+registerCasinoChairs(-10, -3);
+
+casinoTable(0, 3, "blackjack");
+registerCasinoChairs(0, 3);
+
+casinoTable(10, -3, "craps");
+registerCasinoChairs(10, -3);
 
 
    // Slot machine banks
@@ -1682,8 +1700,12 @@ let verticalVelocity = 5;
 const jumpStrength = 7;
 const gravity = 20;
 const groundY = 2.2; // Your camera's starting height
-let isGrounded = true;    
-  
+let isGrounded = true;
+// Chair seating
+let isSitting = false;
+let seatedChair = null;
+const standingCameraHeight = 2.2;
+const seatedCameraHeight = 1.55;  
   const keys = {};
 
 document.addEventListener("keydown", (event) => {
@@ -1702,9 +1724,48 @@ document.addEventListener("keydown", (event) => {
   }
 
   if (event.code !== "KeyE" || !controls.isLocked || activeSpin) {
-    return;
-  }
+  return;
+}
 
+if (isSitting) {
+  const chair = seatedChair;
+
+  isSitting = false;
+  seatedChair = null;
+
+  if (chair) chair.occupiedBy = null;
+
+  camera.position.y = standingCameraHeight;
+  verticalVelocity = 0;
+  isGrounded = true;
+  return;
+}
+
+const nearestChair = usableChairs
+  .filter(chair => !chair.occupiedBy)
+  .map(chair => ({
+    chair,
+    distance: Math.hypot(
+      camera.position.x - chair.x,
+      camera.position.z - chair.z
+    )
+  }))
+  .filter(item => item.distance < 1.8)
+  .sort((a, b) => a.distance - b.distance)[0];
+
+if (nearestChair) {
+  seatedChair = nearestChair.chair;
+  seatedChair.occupiedBy = socket.id;
+
+  isSitting = true;
+  camera.position.x = seatedChair.x;
+  camera.position.z = seatedChair.z;
+  camera.position.y = seatedCameraHeight;
+
+  verticalVelocity = 0;
+  isGrounded = true;
+  return;
+}
   let nearest = null;
   let nearestDistance = Infinity;
 
@@ -1752,7 +1813,7 @@ document.addEventListener("keydown", (event) => {
         isGrounded = true;
       }
       
-      if (controls.isLocked) {
+      if (controls.isLocked && !isSitting) {
        const speed = 7 * delta;
        const oldPosition = camera.position.clone();
 
