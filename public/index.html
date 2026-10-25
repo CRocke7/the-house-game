@@ -1728,6 +1728,8 @@ document.addEventListener("keydown", (event) => {
 }
 
 if (isSitting) {
+  socket.emit("standUp");
+
   const chair = seatedChair;
 
   isSitting = false;
