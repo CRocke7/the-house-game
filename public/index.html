@@ -618,18 +618,7 @@
     const vertices = [];
     const indices = [];
 
-    // Build a real flat ring segment, not a wedge to the center
-    for (let j = 0; j <= segments; j++) {
-      const a = startAngle + (endAngle - startAngle) * j / segments;
-
-      vertices.push(
-        Math.sin(a) * innerRadius, pocketY, Math.cos(a) * innerRadius,
-        Math.sin(a) * outerRadius, pocketY, Math.cos(a) * outerRadius
-      );
-    }
-
-    for (let j = 0; j < segments; j++) {
-      const a = j * 2;
+    const a = j * 2;
       indices.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
     }
 
@@ -643,10 +632,10 @@
 
     const pocket = new THREE.Mesh(
       geometry,
-     new THREE.MeshBasicMaterial({
-  color,
-  side: THREE.DoubleSide
-})
+      new THREE.MeshBasicMaterial({
+        color: color,
+        side: THREE.DoubleSide
+      })
     );
 
     wheel.add(pocket);
