@@ -1689,6 +1689,18 @@ let isGrounded = true;
 document.addEventListener("keydown", (event) => {
   keys[event.code] = true;
 
+  // Jump when Space is pressed.
+  if (event.code === "Space") {
+    event.preventDefault();
+
+    if (controls.isLocked && isGrounded) {
+      verticalVelocity = jumpStrength;
+      isGrounded = false;
+    }
+
+    return;
+  }
+
   if (event.code !== "KeyE" || !controls.isLocked || activeSpin) {
     return;
   }
