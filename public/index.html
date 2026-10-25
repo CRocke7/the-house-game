@@ -1677,13 +1677,23 @@ if (overlapsObject()) {
   let selectedBet = null;
   let waitingForResult = false;
 
-  // Press R while playing to open the roulette panel.
   document.addEventListener("keydown", (event) => {
     if (
-      event.code === "KeyR" &&
-      !event.repeat &&
-      controls.isLocked
+      event.code !== "KeyR" ||
+      event.repeat ||
+      !controls.isLocked ||
+      panel.style.display === "block"
     ) {
+      return;
+    }
+
+    // Roulette table is centered at (-10, -3).
+    const rouletteDistance = Math.hypot(
+      camera.position.x - (-10),
+      camera.position.z - (-3)
+    );
+
+    if (rouletteDistance < 4) {
       panel.style.display = "block";
       message.textContent = "Choose your bet, then spin!";
     }
