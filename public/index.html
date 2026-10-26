@@ -2226,7 +2226,132 @@ if (overlapsObject()) {
   });
 
   console.log("Roulette controls connected.");
-})();  
+})(); 
+  /* =========================
+   BLACKJACK CONTROLS
+========================= */
+
+const blackjackPanel = document.querySelector("#blackjackPanel");
+const blackjackClose = document.querySelector("#blackjackClose");
+const blackjackBet = document.querySelector("#blackjackBet");
+const blackjackDeal = document.querySelector("#blackjackDeal");
+const blackjackHit = document.querySelector("#blackjackHit");
+const blackjackStand = document.querySelector("#blackjackStand");
+const blackjackMessage = document.querySelector("#blackjackMessage");
+const blackjackPlayerCards = document.querySelector("#blackjackPlayerCards");
+const blackjackDealerCards = document.querySelector("#blackjackDealerCards");
+const blackjackPlayerTotal = document.querySelector("#blackjackPlayerTotal");
+const blackjackDealerTotal = document.querySelector("#blackjackDealerTotal");
+
+let blackjackActive = false;
+
+function renderBlackjackCards(container, cards) {
+  container.innerHTML = "";
+
+  for (const card of cards || []) {
+    const element = document.createElement("div");
+    element.className = "blackjack-card";
+
+    if (card.hidden) {
+      element.classList.add("hidden-card");
+      container.appendChild(element);
+      continue;
+    }
+
+    const red = card.suit === "♥" || card.suit === "♦";
+    if (red) element.classList.add("red");
+
+    element.innerHTML = `
+      <div>${card.rank}<br>${card.suit}</div>
+      <div class="blackjack-card-bottom">${card.rank} ${card.suit}</div>
+    `;
+
+    container.appendChild(element);
+  }
+}
+
+function showBlackjackPanel() {
+  blackjackPanel.style.display = "block";
+  blackjackActive = true;
+}
+
+function closeBlackjackPanel() {
+  blackjackPanel.style.display = "none";
+  blackjackActive = false;
+}
+
+blackjackClose.addEventListener("click", closeBlackjackPanel);
+
+blackjackDeal.addEventListener("click", () => {
+  const bet = Number(blackjackBet.value);
+
+  if (!Number.isInteger(bet) || bet < 10) {
+    blackjackMessage.textContent = "Enter a whole-number bet of at least $10.";
+    return;
+  }
+
+  blackjackMessage.textContent = "Dealing cards...";
+  blackjackDeal.disabled = true;
+  blackjackHit.disabled = true;
+  blackjackStand.disabled = true;
+
+  socket.emit("blackjackDeal", { bet });
+});
+
+blackjackHit.addEventListener("click", () => {
+  socket.emit("blackjackHit");
+});
+
+blackjackStand.addEventListener("click", () => {
+  socket.emit("blackjackStand");
+});
+
+socket.on("blackjackState", (data) => {
+  renderBlackjackCards(blackjackPlayerCards, data.playerCards);
+  renderBlackjackCards(blackjackDealerCards, data.dealerCards);
+
+  blackjackPlayerTotal.textContent = `(${data.playerTotal})`;
+  blackjackDealerTotal.textContent =
+    data.dealerTotal === null ? "" : `(${data.dealerTotal})`;
+
+  blackjackMessage.textContent = `Bet: $${data.bet}`;
+
+  const playing = data.phase === "playing";
+  blackjackDeal.disabled = playing;
+  blackjackHit.disabled = !playing;
+  blackjackStand.disabled = !playing;
+});
+
+socket.on("blackjackResult", (data) => {
+  renderBlackjackCards(blackjackPlayerCards, data.playerCards);
+  renderBlackjackCards(blackjackDealerCards, data.dealerCards);
+
+  blackjackPlayerTotal.textContent = `(${data.playerTotal})`;
+  blackjackDealerTotal.textContent = `(${data.dealerTotal})`;
+
+  blackjackMessage.textContent =
+    `${data.outcome} Net: ${data.net >= 0 ? "+" : "-"}$${Math.abs(data.net).toLocaleString()}`;
+
+  blackjackDeal.disabled = false;
+  blackjackHit.disabled = true;
+  blackjackStand.disabled = true;
+});
+
+socket.on("blackjackDealError", (error) => {
+  blackjackMessage.textContent =
+    typeof error === "string" ? error : "Couldn't start the hand.";
+
+  blackjackDeal.disabled = false;
+  blackjackHit.disabled = true;
+  blackjackStand.disabled = true;
+});
+
+socket.on("blackjackError", (error) => {
+  blackjackMessage.textContent =
+    typeof error === "string" ? error : "That move couldn't be completed.";
+});
+
+console.log("Blackjack controls connected.");
   </script>
 </body>
 </html>
