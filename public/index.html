@@ -372,6 +372,43 @@
   </style>
 </head>
 <body>
+  <div id="blackjackPanel">
+  <div class="blackjack-content">
+    <div class="blackjack-header">
+      <h2>♠ THE HOUSE — BLACKJACK</h2>
+      <button id="blackjackClose">Close ✕</button>
+    </div>
+
+    <div class="blackjack-bet-row">
+      <label for="blackjackBet">Bet ($)</label>
+      <input id="blackjackBet" type="number" min="10" step="10" value="100">
+      <button id="blackjackDeal">Deal</button>
+    </div>
+
+    <div id="blackjackTable">
+      <div class="blackjack-hand">
+        <div class="blackjack-hand-label">
+          DEALER <span id="blackjackDealerTotal"></span>
+        </div>
+        <div id="blackjackDealerCards" class="blackjack-cards"></div>
+      </div>
+
+      <div id="blackjackMessage">Place your bet and deal to begin.</div>
+
+      <div class="blackjack-hand">
+        <div class="blackjack-hand-label">
+          YOUR HAND <span id="blackjackPlayerTotal"></span>
+        </div>
+        <div id="blackjackPlayerCards" class="blackjack-cards"></div>
+      </div>
+    </div>
+
+    <div class="blackjack-actions">
+      <button id="blackjackHit" disabled>Hit</button>
+      <button id="blackjackStand" disabled>Stand</button>
+    </div>
+  </div>
+</div>
   <div id="hud">
     <div id="brand">THE HOUSE</div>
     <div id="status">CASINO RESORT · PRE-RELEASE</div>
