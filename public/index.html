@@ -1184,43 +1184,13 @@ return wheel;
     layout.position.set(x, 1.565, z);
     scene.add(layout);
   }
-
-  // Chairs around every table
-  for (let i = -1; i <= 1; i++) {
-    box(
-      "casino chair",
-      x + i * 2,
-      0.55,
-      z + 2.4,
-      1.05,
-      1.1,
-      0.8,
-      materials.red
-    );
-  }
 } 
   // Track the position of every usable casino chair.
-const usableChairs = [];
-
-function registerCasinoChairs(x, z) {
-  for (let i = -1; i <= 1; i++) {
-    usableChairs.push({
-      x: x + i * 2,
-      z: z + 2.4,
-      occupiedBy: null
-    });
-  }
-}   
+const usableChairs = [];  
   
-    casinoTable(-10, -3, "roulette");
-registerCasinoChairs(-10, -3);
-
+casinoTable(-10, -3, "roulette");
 casinoTable(0, 3, "blackjack");
-registerCasinoChairs(0, 3);
-
 casinoTable(10, -3, "craps");
-registerCasinoChairs(10, -3);
-
 
    // Slot machine banks
     const slotMachines = [];  
