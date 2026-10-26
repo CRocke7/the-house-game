@@ -208,11 +208,11 @@ socket.emit("sitAccepted", chairId);
   player.balance -= bet;
 
   const symbols = [
-  { name: "Cherry", weight: 35 },
+  { name: "Cherry", weight: 45 },
   { name: "Lemon", weight: 30 },
-  { name: "Clover", weight: 20 },
-  { name: "Diamond", weight: 10 },
-  { name: "Seven", weight: 5 }
+  { name: "Clover", weight: 15 },
+  { name: "Diamond", weight: 7 },
+  { name: "Seven", weight: 3 }
 ];
 
 function spinReel() {
