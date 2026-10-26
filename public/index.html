@@ -2366,7 +2366,12 @@ socket.on("blackjackError", (error) => {
     typeof error === "string" ? error : "That move couldn't be completed.";
 });
 
-console.log("Blackjack controls connected.");
+document.addEventListener("keydown", (event) => {
+  if (event.code === "KeyJ") {
+    console.log("J KEY DETECTED");
+  }
+});
+  console.log("Blackjack controls connected.");
   </script>
 </body>
 </html>
