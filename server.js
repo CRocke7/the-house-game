@@ -237,7 +237,7 @@ const results = Array.from({ length: 3 }, () => spinReel());
     results[1] === results[2] ||
     results[0] === results[2]
   ) {
-    payout = Math.floor(bet * 1.5);
+    payout = Math.floor(bet * 2.0 );
   }
 
   player.balance += payout;
