@@ -1772,7 +1772,25 @@ if (isSitting) {
   return;
 }
 
-const nearestChair = usableChairs
+// Check whether the player is near a slot machine.
+const nearestSlotMachine = slotMachines
+  .map(machine => ({
+    machine,
+    distance: Math.hypot(
+      camera.position.x - machine.x,
+      camera.position.z - machine.z
+    )
+  }))
+  .filter(item => item.distance < 2.5)
+  .sort((a, b) => a.distance - b.distance)[0];
+
+if (nearestSlotMachine) {
+  selectedSlotMachine = nearestSlotMachine.machine;
+  slotMessage.style.display = "block";
+  slotMessage.textContent = "🎰 Slot machine selected! Choose your bet and press SPIN.";
+  return;
+}
+  const nearestChair = usableChairs
   .filter(chair => !chair.occupiedBy)
   .map(chair => ({
     chair,
