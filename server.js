@@ -207,12 +207,27 @@ socket.emit("sitAccepted", chairId);
 
   player.balance -= bet;
 
-  const names = ["Cherry", "Lemon", "Diamond", "Clover", "Seven"];
+  const symbols = [
+  { name: "Cherry", weight: 35 },
+  { name: "Lemon", weight: 30 },
+  { name: "Clover", weight: 20 },
+  { name: "Diamond", weight: 10 },
+  { name: "Seven", weight: 5 }
+];
 
-  const results = Array.from({ length: 3 }, () =>
-    names[Math.floor(Math.random() * names.length)]
-  );
+function spinReel() {
+  const totalWeight = symbols.reduce((sum, symbol) => sum + symbol.weight, 0);
+  let roll = Math.random() * totalWeight;
 
+  for (const symbol of symbols) {
+    roll -= symbol.weight;
+    if (roll < 0) return symbol.name;
+  }
+
+  return symbols[0].name;
+}
+
+const results = Array.from({ length: 3 }, () => spinReel());
   let payout = 0;
 
   if (results.every((name) => name === results[0])) {
