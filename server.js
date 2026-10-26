@@ -32,6 +32,103 @@ const chairPositions = [
   { x: 12, z: -0.6 }
 ];
 
+const blackjackGames = {};
+
+function createBlackjackDeck() {
+  const suits = ["♠", "♥", "♦", "♣"];
+  const ranks = [
+    "A", "2", "3", "4", "5", "6", "7",
+    "8", "9", "10", "J", "Q", "K"
+  ];
+
+  const deck = [];
+
+  for (const suit of suits) {
+    for (const rank of ranks) {
+      deck.push({ rank, suit });
+    }
+  }
+
+  // Shuffle the deck.
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+
+  return deck;
+}
+
+function blackjackDraw(game) {
+  if (game.deck.length === 0) {
+    game.deck = createBlackjackDeck();
+  }
+
+  return game.deck.pop();
+}
+
+function blackjackScore(cards) {
+  let total = 0;
+  let aces = 0;
+
+  for (const card of cards) {
+    if (card.rank === "A") {
+      total += 11;
+      aces++;
+    } else if (["K", "Q", "J"].includes(card.rank)) {
+      total += 10;
+    } else {
+      total += Number(card.rank);
+    }
+  }
+
+  while (total > 21 && aces > 0) {
+    total -= 10;
+    aces--;
+  }
+
+  return total;
+}
+
+function blackjackNatural(cards) {
+  return cards.length === 2 && blackjackScore(cards) === 21;
+}
+
+function sendBlackjackState(socket, game, revealDealer = false) {
+  socket.emit("blackjackState", {
+    playerCards: game.playerCards,
+    dealerCards: revealDealer
+      ? game.dealerCards
+      : [game.dealerCards[0], { hidden: true }],
+    playerTotal: blackjackScore(game.playerCards),
+    dealerTotal: revealDealer
+      ? blackjackScore(game.dealerCards)
+      : null,
+    bet: game.bet,
+    phase: game.phase
+  });
+}
+
+function finishBlackjack(socket, player, game, outcome, payout) {
+  player.balance += payout;
+
+  game.phase = "finished";
+
+  socket.emit("balanceUpdate", player.balance);
+
+  socket.emit("blackjackResult", {
+    outcome,
+    payout,
+    net: payout - game.bet,
+    playerCards: game.playerCards,
+    dealerCards: game.dealerCards,
+    playerTotal: blackjackScore(game.playerCards),
+    dealerTotal: blackjackScore(game.dealerCards),
+    bet: game.bet,
+    balance: player.balance
+  });
+
+  delete blackjackGames[socket.id];
+}
 io.on("connection", (socket) => {
   players[socket.id] = {
   x: 0,
@@ -342,7 +439,120 @@ const results = Array.from({ length: 3 }, () => spinReel());
 
   socket.emit("balanceUpdate", player.balance);
   socket.emit("recoveryMessage", "Recovery allowance claimed! You received $500.");
-});  
+}); 
+
+  socket.on("blackjackDeal", (bet) => {
+    const player = players[socket.id];
+
+    if (!player) return;
+
+    if (blackjackGames[socket.id]) {
+      socket.emit("blackjackError", "Finish your current hand first.");
+      return;
+    }
+
+    if (
+      !Number.isSafeInteger(bet) ||
+      bet < 10 ||
+      bet > player.balance
+    ) {
+      socket.emit(
+        "blackjackError",
+        "Bet must be at least $10 and no more than your balance."
+      );
+      return;
+    }
+
+    player.balance -= bet;
+
+    const game = {
+      deck: createBlackjackDeck(),
+      playerCards: [],
+      dealerCards: [],
+      bet,
+      phase: "playing"
+    };
+
+    blackjackGames[socket.id] = game;
+
+    game.playerCards.push(blackjackDraw(game));
+    game.dealerCards.push(blackjackDraw(game));
+    game.playerCards.push(blackjackDraw(game));
+    game.dealerCards.push(blackjackDraw(game));
+
+    socket.emit("balanceUpdate", player.balance);
+
+    const playerNatural = blackjackNatural(game.playerCards);
+    const dealerNatural = blackjackNatural(game.dealerCards);
+
+    if (playerNatural && dealerNatural) {
+      finishBlackjack(socket, player, game, "push", bet);
+      return;
+    }
+
+    if (playerNatural) {
+      finishBlackjack(
+        socket,
+        player,
+        game,
+        "blackjack",
+        bet + Math.floor(bet * 1.5)
+      );
+      return;
+    }
+
+    if (dealerNatural) {
+      finishBlackjack(socket, player, game, "dealer_blackjack", 0);
+      return;
+    }
+
+    sendBlackjackState(socket, game);
+  });
+
+  socket.on("blackjackHit", () => {
+    const player = players[socket.id];
+    const game = blackjackGames[socket.id];
+
+    if (!player || !game || game.phase !== "playing") return;
+
+    game.playerCards.push(blackjackDraw(game));
+
+    const total = blackjackScore(game.playerCards);
+
+    if (total > 21) {
+      finishBlackjack(socket, player, game, "bust", 0);
+      return;
+    }
+
+    sendBlackjackState(socket, game);
+  });
+
+  socket.on("blackjackStand", () => {
+    const player = players[socket.id];
+    const game = blackjackGames[socket.id];
+
+    if (!player || !game || game.phase !== "playing") return;
+
+    game.phase = "dealer";
+
+    while (blackjackScore(game.dealerCards) < 17) {
+      game.dealerCards.push(blackjackDraw(game));
+    }
+
+    const playerTotal = blackjackScore(game.playerCards);
+    const dealerTotal = blackjackScore(game.dealerCards);
+
+    if (dealerTotal > 21) {
+      finishBlackjack(socket, player, game, "dealer_bust", game.bet * 2);
+    } else if (playerTotal > dealerTotal) {
+      finishBlackjack(socket, player, game, "win", game.bet * 2);
+    } else if (playerTotal < dealerTotal) {
+      finishBlackjack(socket, player, game, "lose", 0);
+    } else {
+      finishBlackjack(socket, player, game, "push", game.bet);
+    }
+  });
+  
   socket.on("disconnect", () => {
   const roomCode = playerRooms[socket.id];
    if (roomCode) {
