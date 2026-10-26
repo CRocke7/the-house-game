@@ -2276,12 +2276,15 @@ function showBlackjackPanel() {
 }
 
 function closeBlackjackPanel() {
-  document.addEventListener("keydown", (event) => {
+  blackjackPanel.style.display = "none";
+  blackjackActive = false;
+}
+
+document.addEventListener("keydown", (event) => {
   if (event.code !== "KeyJ" || event.repeat || !controls.isLocked) {
     return;
   }
 
-  // Blackjack table is centered at (0, 3).
   const blackjackDistance = Math.hypot(
     camera.position.x,
     camera.position.z - 3
@@ -2291,10 +2294,6 @@ function closeBlackjackPanel() {
     showBlackjackPanel();
   }
 });
-  blackjackPanel.style.display = "none";
-  blackjackActive = false;
-}
-
 blackjackClose.addEventListener("click", closeBlackjackPanel);
 
 blackjackDeal.addEventListener("click", () => {
