@@ -1672,7 +1672,7 @@ socket.on("playerJoined", ({ id, player }) => {
   avatar.rotation.y = player.rotation;
 
   // Keep seated players visibly lower than standing players.
-  avatar.scale.y = player.isSitting ? 0.8 : 1.15;
+  avatar.scale.y = player.isSitting ? 0.8 : 1.5; = player.isSitting ? 0.8 : 1.15;
 });
   
   socket.on("sitAccepted", (chairId) => {
