@@ -2336,6 +2336,7 @@ const blackjackDealerTotal = document.querySelector("#blackjackDealerTotal");
 const blackjackLiveTotalValue = document.querySelector("#blackjackLiveTotalValue");
   
 let blackjackActive = false;
+let blackjack3DNewHand = false;
 // 3D blackjack cards on the actual table
 const blackjack3D = window.__blackjack3D;
 const blackjack3DCards = [];
@@ -2555,7 +2556,8 @@ blackjackDeal.addEventListener("click", () => {
     blackjackMessage.textContent = "Enter a whole-number bet of at least $10.";
     return;
   }
-
+  
+  blackjack3DNewHand = true;
   blackjackMessage.textContent = "Dealing cards...";
   blackjackDeal.disabled = true;
   blackjackHit.disabled = true;
