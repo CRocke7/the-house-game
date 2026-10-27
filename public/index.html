@@ -2333,7 +2333,8 @@ const blackjackPlayerCards = document.querySelector("#blackjackPlayerCards");
 const blackjackDealerCards = document.querySelector("#blackjackDealerCards");
 const blackjackPlayerTotal = document.querySelector("#blackjackPlayerTotal");
 const blackjackDealerTotal = document.querySelector("#blackjackDealerTotal");
-
+const blackjackLiveTotalValue = document.querySelector("#blackjackLiveTotalValue");
+  
 let blackjackActive = false;
 // 3D blackjack cards on the actual table
 const blackjack3D = window.__blackjack3D;
@@ -2557,7 +2558,11 @@ socket.on("blackjackState", (data) => {
   blackjackPlayerTotal.textContent = `(${data.playerTotal})`;
   blackjackDealerTotal.textContent =
     data.dealerTotal === null ? "" : `(${data.dealerTotal})`;
-
+ 
+  if (blackjackLiveTotalValue) {
+  blackjackLiveTotalValue.textContent = data.playerTotal ?? "—";
+}
+  
   blackjackMessage.textContent = `Bet: $${data.bet}`;
 
   const playing = data.phase === "playing";
@@ -2572,7 +2577,9 @@ socket.on("blackjackResult", (data) => {
   renderBlackjackCards(blackjackDealerCards, data.dealerCards);
 
   blackjackPlayerTotal.textContent = `(${data.playerTotal})`;
-  blackjackDealerTotal.textContent = `(${data.dealerTotal})`;
+  if (blackjackLiveTotalValue) {
+  blackjackLiveTotalValue.textContent = data.playerTotal ?? "—";
+}
 
   blackjackMessage.textContent =
     `${data.outcome} Net: ${data.net >= 0 ? "+" : "-"}$${Math.abs(data.net).toLocaleString()}`;
