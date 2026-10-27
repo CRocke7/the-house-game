@@ -568,7 +568,8 @@ const results = Array.from({ length: 3 }, () => spinReel());
     
   delete players[socket.id];
   delete playerRooms[socket.id];
-
+  delete blackjackGames[socket.id];
+    
   if (roomCode) {
     socket.to(roomCode).emit("playerLeft", socket.id);
 
