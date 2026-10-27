@@ -425,6 +425,40 @@
     padding: 12px;
   }
 }
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(8, 24, 18, 0.96);
+  border: 2px solid #c9a44c;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+}
+
+#blackjackPanel .blackjack-header {
+  display: none;
+}
+
+#blackjackPanel #blackjackTable {
+  display: none;
+}
+
+#blackjackPanel .blackjack-bet-row,
+#blackjackPanel .blackjack-actions {
+  margin: 0;
+  gap: 8px;
+}
+
+#blackjackPanel #blackjackMessage {
+  min-height: 0;
+  font-size: 13px;
+}
+
+#blackjackPanel .blackjack-actions button,
+#blackjackPanel #blackjackDeal {
+  padding: 9px 18px;
+}
   </style>
 </head>
 <body>
