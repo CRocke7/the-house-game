@@ -2339,7 +2339,9 @@ let blackjackActive = false;
 // 3D blackjack cards on the actual table
 const blackjack3D = window.__blackjack3D;
 const blackjack3DCards = [];
-
+const blackjack3DDealerMeshes = [];
+const blackjack3DPlayerMeshes = [];
+  
 function clearBlackjack3DCards() {
   for (const mesh of blackjack3DCards) {
     blackjack3D.scene.remove(mesh);
