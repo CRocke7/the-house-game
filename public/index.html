@@ -2309,7 +2309,7 @@ blackjackDeal.addEventListener("click", () => {
   blackjackHit.disabled = true;
   blackjackStand.disabled = true;
 
-  socket.emit("blackjackDeal", { bet });
+  socket.emit("blackjackDeal", bet);
 });
 
 blackjackHit.addEventListener("click", () => {
