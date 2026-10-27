@@ -2475,14 +2475,25 @@ function renderBlackjack3DCards(playerCards, dealerCards) {
 
   // Dealer's hand sits on the far side of the felt.
   (dealerCards || []).forEach((card, i) => {
-    dealBlackjack3DCard(card, (i - (dealerCards.length - 1) / 2) * 0.48, 2.35, i * 140);
+    dealBlackjack3DCard(
+  card,
+  (i - (dealerCards.length - 1) / 2) * 0.48,
+  2.35,
+  i * 140,
+  "dealer"
+);
   });
 
-  // Player's hand sits on the near side of the felt.
-  (playerCards || []).forEach((card, i) => {
-    dealBlackjack3DCard(card, (i - (playerCards.length - 1) / 2) * 0.48, 3.55, (dealerCards || []).length * 140 + i * 140);
-  });
-}
+ // Player's hand sits on the near side of the felt.
+(playerCards || []).forEach((card, i) => {
+  dealBlackjack3DCard(
+    card,
+    (i - (playerCards.length - 1) / 2) * 0.48,
+    3.55,
+    (dealerCards || []).length * 140 + i * 140,
+    "player"
+  );
+});
 
   function renderBlackjackCards(container, cards) {
   container.innerHTML = "";
