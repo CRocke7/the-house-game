@@ -2407,7 +2407,7 @@ function createBlackjackCardTexture(card) {
   return texture;
 }
 
-function dealBlackjack3DCard(card, x, z, delay = 0) {
+function dealBlackjack3DCard(card, x, z, delay = 0, hand = "player") {
   const THREE = blackjack3D.THREE;
 
   const material = new THREE.MeshBasicMaterial({
@@ -2426,6 +2426,12 @@ function dealBlackjack3DCard(card, x, z, delay = 0) {
 
   blackjack3D.scene.add(mesh);
   blackjack3DCards.push(mesh);
+
+if (hand === "dealer") {
+  blackjack3DDealerMeshes.push(mesh);
+} else {
+  blackjack3DPlayerMeshes.push(mesh);
+}
 
   const startTime = performance.now() + delay;
   const duration = 420;
