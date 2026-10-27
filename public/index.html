@@ -2468,35 +2468,50 @@ if (hand === "dealer") {
   requestAnimationFrame(animateCard);
 }
 
-function renderBlackjack3DCards(playerCards, dealerCards) {
-  if (!blackjack3D) {
+if (!blackjack3D) {
     console.error("Blackjack 3D scene connection is missing.");
     return;
   }
 
-  clearBlackjack3DCards();
+  const dealer = dealerCards || [];
+  const player = playerCards || [];
 
-  // Dealer's hand sits on the far side of the felt.
-  (dealerCards || []).forEach((card, i) => {
+  // Clear the table only when starting a new hand.
+  if (blackjack3DNewHand) {
+    clearBlackjack3DCards();
+    blackjack3DNewHand = false;
+  }
+
+  // Add only new dealer cards.
+  for (
+    let i = blackjack3DDealerMeshes.length;
+    i < dealer.length;
+    i++
+  ) {
     dealBlackjack3DCard(
-  card,
-  (i - (dealerCards.length - 1) / 2) * 0.48,
-  2.35,
-  i * 140,
-  "dealer"
-);
-  });
+      dealer[i],
+      (i - (dealer.length - 1) / 2) * 0.48,
+      2.35,
+      i * 140,
+      "dealer"
+    );
+  }
 
- // Player's hand sits on the near side of the felt.
-(playerCards || []).forEach((card, i) => {
-  dealBlackjack3DCard(
-    card,
-    (i - (playerCards.length - 1) / 2) * 0.48,
-    3.55,
-    (dealerCards || []).length * 140 + i * 140,
-    "player"
-  );
-});
+  // Add only new player cards.
+  for (
+    let i = blackjack3DPlayerMeshes.length;
+    i < player.length;
+    i++
+  ) {
+    dealBlackjack3DCard(
+      player[i],
+      (i - (player.length - 1) / 2) * 0.48,
+      3.55,
+      dealer.length * 140 + i * 140,
+      "player"
+    );
+  }
+}
 
   function renderBlackjackCards(container, cards) {
   container.innerHTML = "";
