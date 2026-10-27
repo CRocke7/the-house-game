@@ -624,7 +624,30 @@
     import * as THREE from "three";
     import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
     import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
+    const socket = io();
 
+const roomMessage = document.querySelector("#roomMessage");
+const createRoomButton = document.querySelector("#createRoomButton");
+const joinRoomButton = document.querySelector("#joinRoomButton");
+const roomCodeInput = document.querySelector("#roomCodeInput");
+
+createRoomButton.addEventListener("click", () => {
+  roomMessage.textContent = "Creating room...";
+  socket.emit("createRoom");
+});
+
+joinRoomButton.addEventListener("click", () => {
+  const code = roomCodeInput.value.trim();
+
+  if (!code) {
+    roomMessage.textContent = "Enter a room code first.";
+    return;
+  }
+
+  roomMessage.textContent = "Joining room...";
+  socket.emit("joinRoom", code);
+});
+  
     const scene = new THREE.Scene();
     window.__blackjack3D = { scene, THREE };
   
