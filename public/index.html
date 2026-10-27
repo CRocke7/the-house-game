@@ -626,7 +626,8 @@
     import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
 
     const scene = new THREE.Scene();
-
+    window.__blackjack3D = { scene, THREE };
+  
     const playerRadius = 0.45;
 
     const collidableObjects = [];
