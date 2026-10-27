@@ -65,6 +65,28 @@ function blackjackDraw(game) {
 
   return game.deck.pop();
 }
+function blackjackPlayerDraw(game) {
+  if (game.deck.length === 0) {
+    game.deck = createBlackjackDeck();
+  }
+
+  // Most draws remain normal. Occasionally favor a card
+  // that won't make the player bust.
+  const safeCards = game.deck.filter(card =>
+    blackjackScore([...game.playerCards, card]) <= 21
+  );
+
+  if (safeCards.length > 0 && Math.random() < 0.15) {
+    const card = safeCards[
+      Math.floor(Math.random() * safeCards.length)
+    ];
+
+    game.deck.splice(game.deck.indexOf(card), 1);
+    return card;
+  }
+
+  return blackjackDraw(game);
+}
 
 function blackjackScore(cards) {
   let total = 0;
