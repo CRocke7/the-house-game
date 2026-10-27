@@ -2335,8 +2335,147 @@ const blackjackPlayerTotal = document.querySelector("#blackjackPlayerTotal");
 const blackjackDealerTotal = document.querySelector("#blackjackDealerTotal");
 
 let blackjackActive = false;
+// 3D blackjack cards on the actual table
+const blackjack3D = window.__blackjack3D;
+const blackjack3DCards = [];
 
-function renderBlackjackCards(container, cards) {
+function clearBlackjack3DCards() {
+  for (const mesh of blackjack3DCards) {
+    blackjack3D.scene.remove(mesh);
+    mesh.geometry.dispose();
+    mesh.material.map?.dispose();
+    mesh.material.dispose();
+  }
+  blackjack3DCards.length = 0;
+}
+
+function createBlackjackCardTexture(card) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 360;
+
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = card.hidden ? "#173d70" : "#fffdf5";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.lineWidth = 8;
+  ctx.strokeStyle = "#d1ad52";
+  ctx.strokeRect(5, 5, 246, 350);
+
+  if (card.hidden) {
+    ctx.strokeStyle = "#8fb2e8";
+    ctx.lineWidth = 3;
+
+    for (let i = -360; i < 360; i += 32) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i + 360, 360);
+      ctx.stroke();
+    }
+  } else {
+    const red = card.suit === "♥" || card.suit === "♦";
+    const ink = red ? "#c62828" : "#171717";
+
+    ctx.fillStyle = ink;
+    ctx.font = "bold 54px Georgia";
+    ctx.textAlign = "left";
+    ctx.fillText(card.rank, 22, 62);
+    ctx.font = "48px Georgia";
+    ctx.fillText(card.suit, 22, 112);
+
+    ctx.textAlign = "center";
+    ctx.font = "bold 112px Georgia";
+    ctx.fillText(card.suit, 128, 215);
+
+    ctx.save();
+    ctx.translate(256, 360);
+    ctx.rotate(Math.PI);
+    ctx.textAlign = "left";
+    ctx.font = "bold 54px Georgia";
+    ctx.fillText(card.rank, 22, 62);
+    ctx.font = "48px Georgia";
+    ctx.fillText(card.suit, 22, 112);
+    ctx.restore();
+  }
+
+  const texture = new blackjack3D.THREE.CanvasTexture(canvas);
+  texture.colorSpace = blackjack3D.THREE.SRGBColorSpace;
+  return texture;
+}
+
+function dealBlackjack3DCard(card, x, z, delay = 0) {
+  const THREE = blackjack3D.THREE;
+
+  const material = new THREE.MeshBasicMaterial({
+    map: createBlackjackCardTexture(card),
+    side: THREE.DoubleSide
+  });
+
+  const mesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.42, 0.62),
+    material
+  );
+
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.position.set(-1.1, 2.05, 2.05);
+  mesh.scale.setScalar(0.85);
+
+  blackjack3D.scene.add(mesh);
+  blackjack3DCards.push(mesh);
+
+  const startTime = performance.now() + delay;
+  const duration = 420;
+
+  function animateCard(now) {
+    if (!blackjack3DCards.includes(mesh)) return;
+
+    if (now < startTime) {
+      requestAnimationFrame(animateCard);
+      return;
+    }
+
+    const progress = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+
+    mesh.position.x = -1.1 + (x + 1.1) * eased;
+    mesh.position.z = 2.05 + (z - 2.05) * eased;
+    mesh.position.y = 2.05 + (1.62 - 2.05) * eased
+      + Math.sin(progress * Math.PI) * 0.22;
+
+    mesh.scale.setScalar(0.85 + 0.15 * eased);
+
+    if (progress < 1) {
+      requestAnimationFrame(animateCard);
+    } else {
+      mesh.position.set(x, 1.62, z);
+      mesh.scale.setScalar(1);
+    }
+  }
+
+  requestAnimationFrame(animateCard);
+}
+
+function renderBlackjack3DCards(playerCards, dealerCards) {
+  if (!blackjack3D) {
+    console.error("Blackjack 3D scene connection is missing.");
+    return;
+  }
+
+  clearBlackjack3DCards();
+
+  // Dealer's hand sits on the far side of the felt.
+  (dealerCards || []).forEach((card, i) => {
+    dealBlackjack3DCard(card, (i - (dealerCards.length - 1) / 2) * 0.48, 2.35, i * 140);
+  });
+
+  // Player's hand sits on the near side of the felt.
+  (playerCards || []).forEach((card, i) => {
+    dealBlackjack3DCard(card, (i - (playerCards.length - 1) / 2) * 0.48, 3.55, (dealerCards || []).length * 140 + i * 140);
+  });
+}
+
+  function renderBlackjackCards(container, cards) {
   container.innerHTML = "";
 
   for (const card of cards || []) {
@@ -2412,7 +2551,7 @@ blackjackStand.addEventListener("click", () => {
 });
 
 socket.on("blackjackState", (data) => {
-  renderBlackjackCards(blackjackPlayerCards, data.playerCards);
+  renderBlackjack3DCards(data.playerCards, data.dealerCards);
   renderBlackjackCards(blackjackDealerCards, data.dealerCards);
 
   blackjackPlayerTotal.textContent = `(${data.playerTotal})`;
@@ -2428,6 +2567,7 @@ socket.on("blackjackState", (data) => {
 });
 
 socket.on("blackjackResult", (data) => {
+  renderBlackjack3DCards(data.playerCards, data.dealerCards);
   renderBlackjackCards(blackjackPlayerCards, data.playerCards);
   renderBlackjackCards(blackjackDealerCards, data.dealerCards);
 
