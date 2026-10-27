@@ -2349,9 +2349,11 @@ function clearBlackjack3DCards() {
     mesh.material.map?.dispose();
     mesh.material.dispose();
   }
-  blackjack3DCards.length = 0;
-}
 
+  blackjack3DCards.length = 0;
+  blackjack3DDealerMeshes.length = 0;
+  blackjack3DPlayerMeshes.length = 0;
+}
 function createBlackjackCardTexture(card) {
   const canvas = document.createElement("canvas");
   canvas.width = 256;
