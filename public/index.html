@@ -2355,68 +2355,68 @@ function clearBlackjack3DCards() {
   blackjack3DDealerMeshes.length = 0;
   blackjack3DPlayerMeshes.length = 0;
 }
-function createBlackjackCardTexture(card) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 256;
-  canvas.height = 360;
-
-  const ctx = canvas.getContext("2d");
-
-  ctx.fillStyle = card.hidden ? "#173d70" : "#fffdf5";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.lineWidth = 8;
-  ctx.strokeStyle = "#d1ad52";
-  ctx.strokeRect(5, 5, 246, 350);
-
-  if (card.hidden) {
-    ctx.strokeStyle = "#8fb2e8";
-    ctx.lineWidth = 3;
-
-    for (let i = -360; i < 360; i += 32) {
-      ctx.beginPath();
-      ctx.moveTo(i, 0);
-      ctx.lineTo(i + 360, 360);
-      ctx.stroke();
-    }
-  } else {
-    const red = card.suit === "♥" || card.suit === "♦";
-    const ink = red ? "#c62828" : "#171717";
-
-    ctx.fillStyle = ink;
-    ctx.font = "bold 54px Georgia";
-    ctx.textAlign = "left";
-    ctx.fillText(card.rank, 22, 62);
-    ctx.font = "48px Georgia";
-    ctx.fillText(card.suit, 22, 112);
-
-    ctx.textAlign = "center";
-    ctx.font = "bold 112px Georgia";
-    ctx.fillText(card.suit, 128, 215);
-
-    ctx.save();
-    ctx.translate(256, 360);
-    ctx.rotate(Math.PI);
-    ctx.textAlign = "left";
-    ctx.font = "bold 54px Georgia";
-    ctx.fillText(card.rank, 22, 62);
-    ctx.font = "48px Georgia";
-    ctx.fillText(card.suit, 22, 112);
-    ctx.restore();
+function renderBlackjack3DCards(playerCards, dealerCards) {
+  if (!blackjack3D) {
+    console.error("Blackjack 3D scene connection is missing.");
+    return;
   }
 
-  const texture = new blackjack3D.THREE.CanvasTexture(canvas);
-  texture.colorSpace = blackjack3D.THREE.SRGBColorSpace;
-  return texture;
+  const dealer = dealerCards || [];
+  const player = playerCards || [];
+
+  if (blackjack3DNewHand) {
+    clearBlackjack3DCards();
+    blackjack3DNewHand = false;
+  }
+
+  // Update the dealer's existing cards, including the hidden card.
+  for (let i = 0; i < Math.min(blackjack3DDealerMeshes.length, dealer.length); i++) {
+    const mesh = blackjack3DDealerMeshes[i];
+    const card = dealer[i];
+
+    if (mesh.userData.cardHidden !== !!card.hidden) {
+      const oldTexture = mesh.material.map;
+      mesh.material.map = createBlackjackCardTexture(card);
+      mesh.material.needsUpdate = true;
+
+      if (oldTexture) oldTexture.dispose();
+
+      mesh.userData.cardHidden = !!card.hidden;
+    }
+
+    mesh.position.x = (i - (dealer.length - 1) / 2) * 0.48;
+    mesh.position.z = 2.35;
+  }
+
+  // Deal any new dealer cards.
+  for (let i = blackjack3DDealerMeshes.length; i < dealer.length; i++) {
+    dealBlackjack3DCard(
+      dealer[i],
+      (i - (dealer.length - 1) / 2) * 0.48,
+      2.35,
+      i * 140,
+      "dealer"
+    );
+  }
+
+  // Reposition existing player cards.
+  for (let i = 0; i < Math.min(blackjack3DPlayerMeshes.length, player.length); i++) {
+    blackjack3DPlayerMeshes[i].position.x =
+      (i - (player.length - 1) / 2) * 0.48;
+    blackjack3DPlayerMeshes[i].position.z = 3.55;
+  }
+
+  // Deal any new player cards.
+  for (let i = blackjack3DPlayerMeshes.length; i < player.length; i++) {
+    dealBlackjack3DCard(
+      player[i],
+      (i - (player.length - 1) / 2) * 0.48,
+      3.55,
+      dealer.length * 140 + i * 140,
+      "player"
+    );
+  }
 }
-
-function dealBlackjack3DCard(card, x, z, delay = 0, hand = "player") {
-  const THREE = blackjack3D.THREE;
-
-  const material = new THREE.MeshBasicMaterial({
-    map: createBlackjackCardTexture(card),
-    side: THREE.DoubleSide
-  });
 
   const mesh = new THREE.Mesh(
     new THREE.PlaneGeometry(0.36, 0.53),
