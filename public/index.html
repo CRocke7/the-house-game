@@ -2355,68 +2355,13 @@ function clearBlackjack3DCards() {
   blackjack3DDealerMeshes.length = 0;
   blackjack3DPlayerMeshes.length = 0;
 }
-function renderBlackjack3DCards(playerCards, dealerCards) {
-  if (!blackjack3D) {
-    console.error("Blackjack 3D scene connection is missing.");
-    return;
-  }
+function dealBlackjack3DCard(card, x, z, delay, hand) {
+  if (!blackjack3D || !card) return;
 
-  const dealer = dealerCards || [];
-  const player = playerCards || [];
-
-  if (blackjack3DNewHand) {
-    clearBlackjack3DCards();
-    blackjack3DNewHand = false;
-  }
-
-  // Update the dealer's existing cards, including the hidden card.
-  for (let i = 0; i < Math.min(blackjack3DDealerMeshes.length, dealer.length); i++) {
-    const mesh = blackjack3DDealerMeshes[i];
-    const card = dealer[i];
-
-    if (mesh.userData.cardHidden !== !!card.hidden) {
-      const oldTexture = mesh.material.map;
-      mesh.material.map = createBlackjackCardTexture(card);
-      mesh.material.needsUpdate = true;
-
-      if (oldTexture) oldTexture.dispose();
-
-      mesh.userData.cardHidden = !!card.hidden;
-    }
-
-    mesh.position.x = (i - (dealer.length - 1) / 2) * 0.48;
-    mesh.position.z = 2.35;
-  }
-
-  // Deal any new dealer cards.
-  for (let i = blackjack3DDealerMeshes.length; i < dealer.length; i++) {
-    dealBlackjack3DCard(
-      dealer[i],
-      (i - (dealer.length - 1) / 2) * 0.48,
-      2.35,
-      i * 140,
-      "dealer"
-    );
-  }
-
-  // Reposition existing player cards.
-  for (let i = 0; i < Math.min(blackjack3DPlayerMeshes.length, player.length); i++) {
-    blackjack3DPlayerMeshes[i].position.x =
-      (i - (player.length - 1) / 2) * 0.48;
-    blackjack3DPlayerMeshes[i].position.z = 3.55;
-  }
-
-  // Deal any new player cards.
-  for (let i = blackjack3DPlayerMeshes.length; i < player.length; i++) {
-    dealBlackjack3DCard(
-      player[i],
-      (i - (player.length - 1) / 2) * 0.48,
-      3.55,
-      dealer.length * 140 + i * 140,
-      "player"
-    );
-  }
-}
+  const material = new THREE.MeshBasicMaterial({
+    map: createBlackjackCardTexture(card),
+    side: THREE.DoubleSide
+  });
 
   const mesh = new THREE.Mesh(
     new THREE.PlaneGeometry(0.36, 0.53),
@@ -2431,11 +2376,11 @@ function renderBlackjack3DCards(playerCards, dealerCards) {
   mesh.userData.cardHidden = !!card.hidden;
   blackjack3DCards.push(mesh);
 
-if (hand === "dealer") {
-  blackjack3DDealerMeshes.push(mesh);
-} else {
-  blackjack3DPlayerMeshes.push(mesh);
-}
+  if (hand === "dealer") {
+    blackjack3DDealerMeshes.push(mesh);
+  } else {
+    blackjack3DPlayerMeshes.push(mesh);
+  }
 
   const startTime = performance.now() + delay;
   const duration = 420;
@@ -2453,8 +2398,9 @@ if (hand === "dealer") {
 
     mesh.position.x = -1.1 + (x + 1.1) * eased;
     mesh.position.z = 2.05 + (z - 2.05) * eased;
-    mesh.position.y = 2.05 + (1.62 - 2.05) * eased
-      + Math.sin(progress * Math.PI) * 0.22;
+    mesh.position.y =
+      2.05 + (1.62 - 2.05) * eased +
+      Math.sin(progress * Math.PI) * 0.22;
 
     mesh.scale.setScalar(0.85 + 0.15 * eased);
 
@@ -2469,7 +2415,7 @@ if (hand === "dealer") {
   requestAnimationFrame(animateCard);
 }
 
-  function renderBlackjack3DCards(playerCards, dealerCards) {
+function renderBlackjack3DCards(playerCards, dealerCards) {
   if (!blackjack3D) {
     console.error("Blackjack 3D scene connection is missing.");
     return;
@@ -2478,19 +2424,35 @@ if (hand === "dealer") {
   const dealer = dealerCards || [];
   const player = playerCards || [];
 
-  // Clear the table only when starting a new hand.
   if (blackjack3DNewHand) {
     clearBlackjack3DCards();
     blackjack3DNewHand = false;
   }
 
-  // Reposition existing dealer cards whenever the hand grows.
-  blackjack3DDealerMeshes.forEach((mesh, i) => {
+  // Update existing dealer cards, including flipping the hidden card.
+  for (
+    let i = 0;
+    i < Math.min(blackjack3DDealerMeshes.length, dealer.length);
+    i++
+  ) {
+    const mesh = blackjack3DDealerMeshes[i];
+    const card = dealer[i];
+
+    if (mesh.userData.cardHidden !== !!card.hidden) {
+      const oldTexture = mesh.material.map;
+      mesh.material.map = createBlackjackCardTexture(card);
+      mesh.material.needsUpdate = true;
+
+      if (oldTexture) oldTexture.dispose();
+
+      mesh.userData.cardHidden = !!card.hidden;
+    }
+
     mesh.position.x = (i - (dealer.length - 1) / 2) * 0.48;
     mesh.position.z = 2.35;
-  });
+  }
 
-  // Deal only the dealer cards that don't exist yet.
+  // Deal only new dealer cards.
   for (let i = blackjack3DDealerMeshes.length; i < dealer.length; i++) {
     dealBlackjack3DCard(
       dealer[i],
@@ -2501,13 +2463,18 @@ if (hand === "dealer") {
     );
   }
 
-  // Reposition existing player cards whenever the hand grows.
-  blackjack3DPlayerMeshes.forEach((mesh, i) => {
-    mesh.position.x = (i - (player.length - 1) / 2) * 0.48;
-    mesh.position.z = 3.55;
-  });
+  // Reposition existing player cards.
+  for (
+    let i = 0;
+    i < Math.min(blackjack3DPlayerMeshes.length, player.length);
+    i++
+  ) {
+    blackjack3DPlayerMeshes[i].position.x =
+      (i - (player.length - 1) / 2) * 0.48;
+    blackjack3DPlayerMeshes[i].position.z = 3.55;
+  }
 
-  // Deal only the player cards that don't exist yet.
+  // Deal only new player cards.
   for (let i = blackjack3DPlayerMeshes.length; i < player.length; i++) {
     dealBlackjack3DCard(
       player[i],
