@@ -2361,6 +2361,47 @@ function clearBlackjack3DCards() {
   blackjack3DDealerMeshes.length = 0;
   blackjack3DPlayerMeshes.length = 0;
 }
+  
+function createBlackjackCardTexture(card) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 360;
+
+  const ctx = canvas.getContext("2d");
+
+  // Card background
+  ctx.fillStyle = card.hidden ? "#183b70" : "#ffffff";
+  ctx.fillRect(0, 0, 256, 360);
+
+  if (card.hidden) {
+    ctx.strokeStyle = "#d4af37";
+    ctx.lineWidth = 8;
+    ctx.strokeRect(16, 16, 224, 328);
+
+    ctx.font = "bold 100px serif";
+    ctx.fillStyle = "#d4af37";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("H", 128, 180);
+  } else {
+    const red = card.suit === "♥" || card.suit === "♦";
+
+    ctx.fillStyle = red ? "#d21f35" : "#171717";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    ctx.font = "bold 64px serif";
+    ctx.fillText(card.rank || "", 128, 115);
+
+    ctx.font = "100px serif";
+    ctx.fillText(card.suit || "", 128, 235);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+  
 function dealBlackjack3DCard(card, x, z, delay, hand) {
   if (!blackjack3D || !card) return;
 
