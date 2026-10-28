@@ -2428,6 +2428,7 @@ function renderBlackjack3DCards(playerCards, dealerCards) {
   mesh.scale.setScalar(0.85);
 
   blackjack3D.scene.add(mesh);
+  mesh.userData.cardHidden = !!card.hidden;
   blackjack3DCards.push(mesh);
 
 if (hand === "dealer") {
