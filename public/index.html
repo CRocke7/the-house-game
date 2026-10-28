@@ -2538,6 +2538,8 @@ document.addEventListener("keydown", (event) => {
 blackjackClose.addEventListener("click", closeBlackjackPanel);
 
 blackjackDeal.addEventListener("click", () => {
+  blackjackMessage.textContent = "DEAL BUTTON CLICKED";
+  
   const bet = Number(blackjackBet.value);
 
   if (!Number.isInteger(bet) || bet < 10) {
