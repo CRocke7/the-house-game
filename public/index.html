@@ -2571,6 +2571,7 @@ blackjackStand.addEventListener("click", () => {
 
 socket.on("blackjackState", (data) => {
   renderBlackjack3DCards(data.playerCards, data.dealerCards);
+  renderBlackjackCards(blackjackPlayerCards, data.playerCards);
   renderBlackjackCards(blackjackDealerCards, data.dealerCards);
 
   blackjackPlayerTotal.textContent = `(${data.playerTotal})`;
