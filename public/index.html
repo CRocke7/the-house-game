@@ -2326,7 +2326,12 @@ const blackjackPanel = document.querySelector("#blackjackPanel");
 const blackjackClose = document.querySelector("#blackjackClose");
 const blackjackBet = document.querySelector("#blackjackBet");
 const blackjackDeal = document.querySelector("#blackjackDeal");
-const blackjackHit = document.querySelector("#blackjackHit");
+document.addEventListener("click", (event) => {
+  if (event.target.closest("#blackjackDeal")) {
+    blackjackMessage.textContent = "BROWSER DETECTED DEAL CLICK";
+  }
+});
+  const blackjackHit = document.querySelector("#blackjackHit");
 const blackjackStand = document.querySelector("#blackjackStand");
 const blackjackMessage = document.querySelector("#blackjackMessage");
 const blackjackPlayerCards = document.querySelector("#blackjackPlayerCards");
