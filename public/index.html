@@ -2421,6 +2421,7 @@ function dealBlackjack3DCard(card, x, z, delay, hand) {
 }
 
 function renderBlackjack3DCards(playerCards, dealerCards) {
+  console.log("3D CARD RENDERER CALLED");
   if (!blackjack3D) {
     console.error("Blackjack 3D scene connection is missing.");
     return;
@@ -2570,6 +2571,7 @@ blackjackStand.addEventListener("click", () => {
 });
 
 socket.on("blackjackState", (data) => {
+  console.log("BLACKJACK STATE RECEIVED:", data);
   renderBlackjack3DCards(data.playerCards, data.dealerCards);
   renderBlackjackCards(blackjackPlayerCards, data.playerCards);
   renderBlackjackCards(blackjackDealerCards, data.dealerCards);
