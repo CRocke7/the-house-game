@@ -767,7 +767,7 @@
     
     function createTableLayout(type) {
       const canvas = document.createElement("canvas");
-      canvas.width = 1024;
+      canvas.width = type === "craps" ? 2048 : 1024;
       canvas.height = 640;
 
       const ctx = canvas.getContext("2d");
@@ -776,7 +776,7 @@
 
       ctx.strokeStyle = "#e5d2a0";
       ctx.lineWidth = 5;
-      ctx.strokeRect(14, 14, 996, 612);
+      ctx.strokeRect(14, 14, canvas.width - 28, 612);
 
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
@@ -879,69 +879,73 @@
         ctx.fillText("INSURANCE", 512, 380);
       }
 
-      if (type === "craps") {
+       if (type === "craps") {
         const W = canvas.width;
         const H = canvas.height;
         const cx = W / 2;
 
         ctx.fillStyle = "#f0d8a0";
-        ctx.font = "bold 50px Georgia";
-        ctx.fillText("CRAPS", cx, 55);
-
-        ctx.strokeStyle = "#e5d2a0";
+        ctx.strokeStyle = "#f0d8a0";
         ctx.lineWidth = 4;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
 
-        // Wide outer betting area
-        ctx.strokeRect(35, 85, W - 70, 520);
+        // Traditional perimeter betting lines
+        ctx.strokeRect(28, 35, W - 56, H - 70);
 
-        // Pass Line across the top
-        ctx.strokeRect(70, 105, W - 140, 65);
-        ctx.font = "bold 32px Georgia";
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText("PASS LINE", cx, 138);
+        // Pass Line and Don't Pass Bar
+        ctx.strokeRect(55, 55, W - 110, 62);
+        ctx.font = "bold 34px Georgia";
+        ctx.fillText("PASS LINE", cx, 86);
 
-        // Main betting boxes
-        const left = 100;
-        const right = W - 100;
-        const top = 195;
-        const bottom = 440;
-        const mid = cx;
+        ctx.strokeRect(55, 125, W - 110, 48);
+        ctx.font = "bold 25px Georgia";
+        ctx.fillText("DON'T PASS BAR", cx, 149);
 
-        ctx.strokeRect(left, top, right - left, bottom - top);
+        // Main betting areas
+        const left = 75;
+        const right = W - 75;
+        const middle = cx;
+
+        ctx.strokeRect(left, 190, right - left, 255);
 
         ctx.beginPath();
-        ctx.moveTo(mid, top);
-        ctx.lineTo(mid, bottom);
+        ctx.moveTo(middle, 190);
+        ctx.lineTo(middle, 445);
         ctx.moveTo(left, 315);
         ctx.lineTo(right, 315);
         ctx.stroke();
 
-        ctx.font = "bold 36px Georgia";
-        ctx.fillText("COME", (left + mid) / 2, 255);
-        ctx.fillText("DON'T COME", (mid + right) / 2, 255);
-        ctx.fillText("FIELD", (left + mid) / 2, 375);
-        ctx.fillText("PLACE BETS", (mid + right) / 2, 375);
+        ctx.font = "bold 42px Georgia";
+        ctx.fillText("COME", (left + middle) / 2, 250);
+        ctx.fillText("DON'T COME", (middle + right) / 2, 250);
+        ctx.fillText("FIELD", (left + middle) / 2, 380);
+        ctx.fillText("PLACE BETS", (middle + right) / 2, 380);
 
-        // Number boxes distributed across the full table
-        const nums = [4, 5, 6, 8, 9, 10];
-        const boxW = 150;
-        const gap = (W - 2 * left - nums.length * boxW) /
-                    (nums.length - 1);
-        const total = nums.length * boxW +
-                      (nums.length - 1) * gap;
-        const start = (W - total) / 2;
+        // Number boxes
+        const numbers = [4, 5, 6, 8, 9, 10];
+        const boxWidth = 190;
+        const boxGap = (W - 2 * 90 - numbers.length * boxWidth) /
+                       (numbers.length - 1);
+        const totalWidth = numbers.length * boxWidth +
+                           (numbers.length - 1) * boxGap;
+        const firstX = (W - totalWidth) / 2;
 
-        nums.forEach((n, i) => {
-          const x = start + i * (boxW + gap);
-          ctx.strokeRect(x, 465, boxW, 90);
-          ctx.font = "bold 38px Georgia";
-          ctx.fillText(String(n), x + boxW / 2, 510);
+        numbers.forEach((number, i) => {
+          const x = firstX + i * (boxWidth + boxGap);
+          ctx.strokeRect(x, 470, boxWidth, 95);
+          ctx.font = "bold 48px Georgia";
+          ctx.fillText(String(number), x + boxWidth / 2, 518);
         });
 
-        ctx.font = "bold 26px Georgia";
-        ctx.fillText("DON'T PASS BAR", cx, 580);
+        // Center proposition betting area
+        ctx.font = "bold 23px Georgia";
+        ctx.fillText("ANY 7", cx - 300, 600);
+        ctx.fillText("ANY CRAPS", cx - 100, 600);
+        ctx.fillText("HARDWAYS", cx + 130, 600);
+        ctx.fillText("YO", cx + 340, 600);
       }
-
+      
       const texture = new THREE.CanvasTexture(canvas);
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
