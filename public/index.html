@@ -1371,33 +1371,34 @@ return wheel;
 
   if (isCraps) {
   const tableWidth = 2.8;
-const tableLength = 8.0;
-const halfWidth = tableWidth / 2;
-const halfLength = tableLength / 2;
-    
-    // Craps table base and felt
+    const tableLength = 8.0;
+    const halfWidth = tableWidth / 2;
+    const halfLength = tableLength / 2;
+
+    // Craps table base and extended felt
     box("table pedestal", x, 0.45, z, 1.5, 0.9, 1.5, materials.dark);
-    box("table rim", x, 0.95, z, 4.2, 0.25, 2.8, materials.gold);
-    box("felt top", x, 1.075, z, 3.65, 0.08, 2.25, topMat);
+    box("table rim", x, 0.95, z, tableLength, 0.25, tableWidth, materials.gold);
+    box("felt top", x, 1.075, z, tableLength - 0.35, 0.08, tableWidth - 0.35, topMat);
 
     // Raised padded walls
     const wallY = 1.28;
     const wallHeight = 0.55;
     const wallThickness = 0.16;
 
-    box("craps back wall", x, wallY, z - 1.22, 3.95, wallHeight, wallThickness, materials.dark);
-    box("craps front wall", x, wallY, z + 1.22, 3.95, wallHeight, wallThickness, materials.dark);
-    box("craps left wall", x - 1.9, wallY, z, wallThickness, wallHeight, 2.3, materials.dark);
-    box("craps right wall", x + 1.9, wallY, z, wallThickness, wallHeight, 2.3, materials.dark);
+    box("craps back wall", x, wallY, z - halfWidth + 0.08, tableLength - 0.25, wallHeight, wallThickness, materials.dark);
+    box("craps front wall", x, wallY, z + halfWidth - 0.08, tableLength - 0.25, wallHeight, wallThickness, materials.dark);
+    box("craps left wall", x - halfLength + 0.08, wallY, z, wallThickness, wallHeight, tableWidth - 0.25, materials.dark);
+    box("craps right wall", x + halfLength - 0.08, wallY, z, wallThickness, wallHeight, tableWidth - 0.25, materials.dark);
 
     // Gold rail caps
-    box("craps back rail", x, 1.57, z - 1.22, 4.05, 0.08, 0.22, materials.gold);
-    box("craps front rail", x, 1.57, z + 1.22, 4.05, 0.08, 0.22, materials.gold);
-    box("craps left rail", x - 1.9, 1.57, z, 0.22, 0.08, 2.4, materials.gold);
-    box("craps right rail", x + 1.9, 1.57, z, 0.22, 0.08, 2.4, materials.gold);
+    box("craps back rail", x, 1.57, z - halfWidth + 0.08, tableLength - 0.15, 0.08, 0.22, materials.gold);
+    box("craps front rail", x, 1.57, z + halfWidth - 0.08, tableLength - 0.15, 0.08, 0.22, materials.gold);
+    box("craps left rail", x - halfLength + 0.08, 1.57, z, 0.22, 0.08, tableWidth - 0.15, materials.gold);
+    box("craps right rail", x + halfLength - 0.08, 1.57, z, 0.22, 0.08, tableWidth - 0.15, materials.gold);
 
+    // Betting print on the extended felt
     const layout = new THREE.Mesh(
-      new THREE.PlaneGeometry(3.65, 2.25),
+      new THREE.PlaneGeometry(tableLength - 0.45, tableWidth - 0.45),
       new THREE.MeshBasicMaterial({
         map: createTableLayout(type),
         side: THREE.DoubleSide
