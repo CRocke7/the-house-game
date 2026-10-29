@@ -767,7 +767,7 @@
     
     function createTableLayout(type) {
       const canvas = document.createElement("canvas");
-      canvas.width = 1024;
+      canvas.width = type === "craps" ? 2048 : 1024;
       canvas.height = 640;
 
       const ctx = canvas.getContext("2d");
@@ -880,33 +880,66 @@
       }
 
       if (type === "craps") {
+        const W = canvas.width;
+        const H = canvas.height;
+        const cx = W / 2;
+
         ctx.fillStyle = "#f0d8a0";
         ctx.font = "bold 50px Georgia";
-        ctx.fillText("CRAPS", 512, 70);
+        ctx.fillText("CRAPS", cx, 55);
 
         ctx.strokeStyle = "#e5d2a0";
         ctx.lineWidth = 4;
 
-        // Main central betting area
-        ctx.strokeRect(220, 125, 584, 360);
+        // Wide outer betting area
+        ctx.strokeRect(35, 85, W - 70, 520);
+
+        // Pass Line across the top
+        ctx.strokeRect(70, 105, W - 140, 65);
+        ctx.font = "bold 32px Georgia";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText("PASS LINE", cx, 138);
+
+        // Main betting boxes
+        const left = 100;
+        const right = W - 100;
+        const top = 195;
+        const bottom = 440;
+        const mid = cx;
+
+        ctx.strokeRect(left, top, right - left, bottom - top);
+
         ctx.beginPath();
-        ctx.moveTo(220, 305);
-        ctx.lineTo(804, 305);
-        ctx.moveTo(512, 125);
-        ctx.lineTo(512, 485);
+        ctx.moveTo(mid, top);
+        ctx.lineTo(mid, bottom);
+        ctx.moveTo(left, 315);
+        ctx.lineTo(right, 315);
         ctx.stroke();
 
-        ctx.fillStyle = "#ffffff";
         ctx.font = "bold 36px Georgia";
-        ctx.fillText("PASS LINE", 512, 155);
-        ctx.fillText("COME", 365, 245);
-        ctx.fillText("DON'T COME", 660, 245);
-        ctx.fillText("FIELD", 365, 365);
-        ctx.fillText("PLACE BETS", 660, 365);
-        ctx.fillText("PASS LINE", 512, 455);
+        ctx.fillText("COME", (left + mid) / 2, 255);
+        ctx.fillText("DON'T COME", (mid + right) / 2, 255);
+        ctx.fillText("FIELD", (left + mid) / 2, 375);
+        ctx.fillText("PLACE BETS", (mid + right) / 2, 375);
 
-        ctx.font = "bold 25px Georgia";
-        ctx.fillText("4   5   6   8   9   10", 512, 535);
+        // Number boxes distributed across the full table
+        const nums = [4, 5, 6, 8, 9, 10];
+        const boxW = 150;
+        const gap = (W - 2 * left - nums.length * boxW) /
+                    (nums.length - 1);
+        const total = nums.length * boxW +
+                      (nums.length - 1) * gap;
+        const start = (W - total) / 2;
+
+        nums.forEach((n, i) => {
+          const x = start + i * (boxW + gap);
+          ctx.strokeRect(x, 465, boxW, 90);
+          ctx.font = "bold 38px Georgia";
+          ctx.fillText(String(n), x + boxW / 2, 510);
+        });
+
+        ctx.font = "bold 26px Georgia";
+        ctx.fillText("DON'T PASS BAR", cx, 580);
       }
 
       const texture = new THREE.CanvasTexture(canvas);
