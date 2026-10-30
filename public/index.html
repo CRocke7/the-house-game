@@ -767,8 +767,8 @@
     
     function createTableLayout(type) {
       const canvas = document.createElement("canvas");
-      canvas.width = 1024;
-      canvas.height = 640;
+      canvas.width = type === "craps" ? 1296 : 1024;
+      canvas.height = type === "craps" ? 384 : 640;
 
       const ctx = canvas.getContext("2d");
       ctx.fillStyle = type === "blackjack" ? "#174f70" : "#176447";
