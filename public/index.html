@@ -2953,26 +2953,9 @@ document.addEventListener("keydown", (event) => {
     }
   }
 
-  document.addEventListener("keydown", (event) => {
-    if (
-      event.code !== "KeyC" ||
-      event.repeat ||
-      !controls.isLocked
-    ) {
-      return;
-    }
-
-    const distance = Math.hypot(
-      camera.position.x - 10,
-      camera.position.z - (-3)
-    );
-
-    if (distance < 4) {
-      openCrapsPanel();
-    }
-  });
-
-  rollButton.addEventListener("click", rollDice);
+  rollButton.addEventListener("click", () => {
+  rollCrapsDice();
+});
   newGameButton.addEventListener("click", newGame);
   closeButton.addEventListener("click", closeCrapsPanel);
 
