@@ -597,7 +597,54 @@
   <button id="rouletteCloseButton" style="padding: 10px; margin-left: 6px;">
     CLOSE
   </button>
-</div>    
+</div> 
+    <div id="crapsPanel" style="
+  display: none;
+  pointer-events: auto;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 380px;
+  max-width: 90vw;
+  padding: 22px;
+  background: #10251e;
+  color: #f5e7c0;
+  border: 2px solid #d7ae61;
+  border-radius: 14px;
+  z-index: 1000;
+  font-family: Georgia, serif;
+  text-align: center;
+">
+  <h2 style="margin-top: 0;">CRAPS</h2>
+
+  <div style="display: flex; justify-content: center; gap: 24px; margin: 25px 0;">
+    <div id="crapsDie1" style="font-size: 55px;">⚀</div>
+    <div id="crapsDie2" style="font-size: 55px;">⚀</div>
+  </div>
+
+  <p id="crapsStatus">Press Roll Dice to begin.</p>
+  <p id="crapsPoint">Point: None</p>
+  <p id="crapsMessage">Good luck!</p>
+
+  <button id="crapsRollButton" style="
+    padding: 12px 25px;
+    background: #d7ae61;
+    color: #10251e;
+    font-weight: bold;
+    font-size: 16px;
+  ">
+    ROLL DICE
+  </button>
+
+  <button id="crapsNewGameButton" style="padding: 10px; margin-left: 6px;">
+    NEW GAME
+  </button>
+
+  <button id="crapsCloseButton" style="padding: 10px; margin-top: 12px;">
+    CLOSE
+  </button>
+</div>
     <div id="help">
       <b>W A S D</b> Move &nbsp;·&nbsp;
       <b>SPACE</b> Jump &nbsp;·&nbsp;
