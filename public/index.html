@@ -1023,6 +1023,75 @@ function createCrapsDie(x, z) {
 createCrapsDie(9.65, -3);
 createCrapsDie(10.35, -3);
 
+  // =========================
+// CRAPS GAME STATE
+// =========================
+
+let crapsPoint = null;
+let crapsRolling = false;
+
+function rollCrapsDice() {
+  if (crapsRolling) return;
+
+  crapsRolling = true;
+
+  const die1 = Math.floor(Math.random() * 6) + 1;
+  const die2 = Math.floor(Math.random() * 6) + 1;
+  const total = die1 + die2;
+
+  const start = performance.now();
+  const duration = 900;
+
+  function animateDice(now) {
+    const progress = Math.min((now - start) / duration, 1);
+
+    crapsDieMeshes.forEach(die => {
+      die.rotation.x += 0.18;
+      die.rotation.z += 0.22;
+
+      if (progress === 1) {
+        die.rotation.set(
+          Math.random() * Math.PI * 2,
+          Math.random() * Math.PI * 2,
+          Math.random() * Math.PI * 2
+        );
+      }
+    });
+
+    if (progress < 1) {
+      requestAnimationFrame(animateDice);
+    } else {
+      crapsRolling = false;
+      handleCrapsResult(total);
+    }
+  }
+
+  requestAnimationFrame(animateDice);
+}
+
+function handleCrapsResult(total) {
+  if (crapsPoint === null) {
+    if (total === 7 || total === 11) {
+      console.log("CRAPS: WIN!");
+    } else if (total === 2 || total === 3 || total === 12) {
+      console.log("CRAPS: LOSS!");
+    } else {
+      crapsPoint = total;
+      console.log("CRAPS POINT:", crapsPoint);
+    }
+  } else {
+    if (total === crapsPoint) {
+      console.log("CRAPS: WIN!");
+      crapsPoint = null;
+    } else if (total === 7) {
+      console.log("CRAPS: LOSS!");
+      crapsPoint = null;
+    } else {
+      console.log("CRAPS: POINT IS", crapsPoint);
+    }
+  }
+}
+  
 scene.add(crapsDice);
   
   let rouletteWheel = null; 
