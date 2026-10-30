@@ -1805,6 +1805,7 @@ copyRoomCodeButton.addEventListener("click", async () => {
     roomMessage.textContent = "Couldn't copy automatically. Copy the code manually.";
   }
 });
+  
 createRoomButton.addEventListener("click", () => {
   roomMessage.textContent = "Creating room...";
   socket.emit("createRoom");
