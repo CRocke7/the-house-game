@@ -2715,6 +2715,124 @@ document.addEventListener("keydown", (event) => {
     console.log("J KEY DETECTED");
   }
 });
+
+  /* =========================
+   CRAPS GAMEPLAY
+========================= */
+
+(() => {
+  const panel = document.querySelector("#crapsPanel");
+  const die1 = document.querySelector("#crapsDie1");
+  const die2 = document.querySelector("#crapsDie2");
+  const status = document.querySelector("#crapsStatus");
+  const pointDisplay = document.querySelector("#crapsPoint");
+  const message = document.querySelector("#crapsMessage");
+  const rollButton = document.querySelector("#crapsRollButton");
+  const newGameButton = document.querySelector("#crapsNewGameButton");
+  const closeButton = document.querySelector("#crapsCloseButton");
+
+  if (!panel || !die1 || !die2 || !status || !pointDisplay ||
+      !message || !rollButton || !newGameButton || !closeButton) {
+    console.error("Craps panel elements are missing.");
+    return;
+  }
+
+  const diceFaces = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+
+  let point = null;
+  let gameOver = false;
+
+  function openCrapsPanel() {
+    panel.style.display = "block";
+    controls.unlock();
+  }
+
+  function closeCrapsPanel() {
+    panel.style.display = "none";
+  }
+
+  function newGame() {
+    point = null;
+    gameOver = false;
+
+    die1.textContent = "⚀";
+    die2.textContent = "⚀";
+    status.textContent = "Come-out roll";
+    pointDisplay.textContent = "Point: None";
+    message.textContent = "Roll the dice to begin!";
+    rollButton.disabled = false;
+  }
+
+  function rollDice() {
+    if (gameOver) return;
+
+    const first = Math.floor(Math.random() * 6) + 1;
+    const second = Math.floor(Math.random() * 6) + 1;
+    const total = first + second;
+
+    die1.textContent = diceFaces[first - 1];
+    die2.textContent = diceFaces[second - 1];
+
+    message.textContent = `You rolled ${first} + ${second} = ${total}.`;
+
+    if (point === null) {
+      if (total === 7 || total === 11) {
+        message.textContent += " YOU WIN!";
+        gameOver = true;
+      } else if (total === 2 || total === 3 || total === 12) {
+        message.textContent += " YOU LOSE!";
+        gameOver = true;
+      } else {
+        point = total;
+        status.textContent = "Point established!";
+        pointDisplay.textContent = `Point: ${point}`;
+        message.textContent += ` Your point is ${point}. Roll again!`;
+      }
+    } else {
+      if (total === point) {
+        message.textContent += " YOU WIN! You hit your point!";
+        gameOver = true;
+      } else if (total === 7) {
+        message.textContent += " YOU LOSE! Seven-out!";
+        gameOver = true;
+      } else {
+        message.textContent += ` Keep rolling. Your point is ${point}.`;
+      }
+    }
+
+    if (gameOver) {
+      status.textContent = "Round finished";
+      rollButton.disabled = true;
+    }
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (
+      event.code !== "KeyC" ||
+      event.repeat ||
+      !controls.isLocked
+    ) {
+      return;
+    }
+
+    const distance = Math.hypot(
+      camera.position.x - 10,
+      camera.position.z - (-3)
+    );
+
+    if (distance < 4) {
+      openCrapsPanel();
+    }
+  });
+
+  rollButton.addEventListener("click", rollDice);
+  newGameButton.addEventListener("click", newGame);
+  closeButton.addEventListener("click", closeCrapsPanel);
+
+  newGame();
+
+  console.log("Craps gameplay connected.");
+})();
   
   </script>
 </body>
