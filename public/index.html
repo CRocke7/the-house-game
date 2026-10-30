@@ -947,6 +947,84 @@
       texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
       return texture;
     }
+  
+// =========================
+// CRAPS 3D DICE
+// =========================
+
+const crapsDice = new THREE.Group();
+const crapsDieMeshes = [];
+
+function createCrapsDie(x, z) {
+  const die = new THREE.Group();
+
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(0.34, 0.34, 0.34),
+    new THREE.MeshStandardMaterial({
+      color: "#fffaf0",
+      roughness: 0.35
+    })
+  );
+
+  die.add(body);
+
+  // Dice dots
+  const dotMaterial = new THREE.MeshBasicMaterial({
+    color: "#202020"
+  });
+
+  const faces = [
+    { normal: [0, 1, 0], count: 1 },
+    { normal: [0, -1, 0], count: 6 },
+    { normal: [0, 0, 1], count: 2 },
+    { normal: [0, 0, -1], count: 5 },
+    { normal: [1, 0, 0], count: 3 },
+    { normal: [-1, 0, 0], count: 4 }
+  ];
+
+  const dotPositions = {
+    1: [[0, 0]],
+    2: [[-0.07, -0.07], [0.07, 0.07]],
+    3: [[-0.07, -0.07], [0, 0], [0.07, 0.07]],
+    4: [[-0.07, -0.07], [-0.07, 0.07], [0.07, -0.07], [0.07, 0.07]],
+    5: [[-0.07, -0.07], [-0.07, 0.07], [0, 0], [0.07, -0.07], [0.07, 0.07]],
+    6: [[-0.07, -0.07], [-0.07, 0], [-0.07, 0.07], [0.07, -0.07], [0.07, 0], [0.07, 0.07]]
+  };
+
+  for (const face of faces) {
+    const normal = new THREE.Vector3(...face.normal);
+    const rotation = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 0, 1),
+      normal
+    );
+
+    for (const [u, v] of dotPositions[face.count]) {
+      const dot = new THREE.Mesh(
+        new THREE.CircleGeometry(0.025, 16),
+        dotMaterial
+      );
+
+      dot.position.set(u, v, 0.172);
+      dot.quaternion.copy(rotation);
+      dot.position.applyQuaternion(rotation);
+      dot.position.add(normal.clone().multiplyScalar(0.001));
+
+      die.add(dot);
+    }
+  }
+
+  die.position.set(x, 1.30, z);
+  crapsDice.add(die);
+  crapsDieMeshes.push(die);
+
+  return die;
+}
+
+createCrapsDie(9.65, -3);
+createCrapsDie(10.35, -3);
+
+scene.add(crapsDice);
+  
   let rouletteWheel = null; 
   let rouletteBetChip = null;
 
