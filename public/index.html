@@ -983,13 +983,13 @@ function createCrapsDie(x, z) {
   ];
 
   const dotPositions = {
-    1: [[0, 0]],
-    2: [[-0.07, -0.07], [0.07, 0.07]],
-    3: [[-0.07, -0.07], [0, 0], [0.07, 0.07]],
-    4: [[-0.07, -0.07], [-0.07, 0.07], [0.07, -0.07], [0.07, 0.07]],
-    5: [[-0.07, -0.07], [-0.07, 0.07], [0, 0], [0.07, -0.07], [0.07, 0.07]],
-    6: [[-0.07, -0.07], [-0.07, 0], [-0.07, 0.07], [0.07, -0.07], [0.07, 0], [0.07, 0.07]]
-  };
+  1: [[0, 0]],
+  2: [[-0.035, -0.035], [0.035, 0.035]],
+  3: [[-0.035, -0.035], [0, 0], [0.035, 0.035]],
+  4: [[-0.035, -0.035], [-0.035, 0.035], [0.035, -0.035], [0.035, 0.035]],
+  5: [[-0.035, -0.035], [-0.035, 0.035], [0, 0], [0.035, -0.035], [0.035, 0.035]],
+  6: [[-0.035, -0.035], [-0.035, 0], [-0.035, 0.035], [0.035, -0.035], [0.035, 0], [0.035, 0.035]]
+};
 
   for (const face of faces) {
     const normal = new THREE.Vector3(...face.normal);
@@ -1000,11 +1000,11 @@ function createCrapsDie(x, z) {
 
     for (const [u, v] of dotPositions[face.count]) {
       const dot = new THREE.Mesh(
-        new THREE.CircleGeometry(0.025, 16),
+        new THREE.CircleGeometry(0.012, 16),
         dotMaterial
       );
 
-      dot.position.set(u, v, 0.172);
+      dot.position.set(u, v, 0.081);
       dot.quaternion.copy(rotation);
       dot.position.applyQuaternion(rotation);
       dot.position.add(normal.clone().multiplyScalar(0.001));
