@@ -959,7 +959,7 @@ function createCrapsDie(x, z) {
   const die = new THREE.Group();
 
   const body = new THREE.Mesh(
-    new THREE.BoxGeometry(0.34, 0.34, 0.34),
+    new THREE.BoxGeometry(0.16, 0.16, 0.16),
     new THREE.MeshStandardMaterial({
       color: "#fffaf0",
       roughness: 0.35
@@ -1013,7 +1013,7 @@ function createCrapsDie(x, z) {
     }
   }
 
-  die.position.set(x, 1.30, z);
+  die.position.set(x, 1.205, z);
   crapsDice.add(die);
   crapsDieMeshes.push(die);
 
